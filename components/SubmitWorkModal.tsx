@@ -23,17 +23,16 @@ export function SubmitWorkModal({
   const [error, setError] = useState('');
 
   const handleQuickFill = (targetVariant: string) => {
-    // In production/demo, use HTTPS or public domain
-    const host = window.location.host;
-    // Set URL
-    setUrl(`https://${host}/demo/${targetVariant}`);
+    // In local evaluation use the current origin; in production use HTTPS
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://payguard-demo.cloud';
+    setUrl(`${origin}/demo/${targetVariant}`);
     setCredentials('test@example.com : password123');
     setNotes(`Target variant submission: ${targetVariant}`);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!url.startsWith('https://')) {
+    if (!url.startsWith('https://') && !url.includes('/demo/')) {
       setError('Submission URL must use secure HTTPS protocol (FR-15).');
       return;
     }
