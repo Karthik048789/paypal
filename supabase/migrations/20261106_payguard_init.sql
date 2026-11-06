@@ -185,3 +185,4 @@ CREATE TABLE IF NOT EXISTS audit_logs (
 
 CREATE INDEX IF NOT EXISTS idx_audit_logs_entity ON audit_logs(entity, entity_id);
 CREATE INDEX IF NOT EXISTS idx_audit_logs_actor ON audit_logs(actor);
+

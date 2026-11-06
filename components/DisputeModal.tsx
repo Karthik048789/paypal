@@ -114,3 +114,4 @@ export function DisputeModal({ jobId, onDisputeOpened, onClose }: DisputeModalPr
     </div>
   );
 }
+

@@ -10,3 +10,4 @@ export async function POST() {
   const report = await runAuthorizationWatcher();
   return NextResponse.json({ success: true, report });
 }
+

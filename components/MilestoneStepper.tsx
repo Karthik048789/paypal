@@ -138,3 +138,4 @@ export function MilestoneStepper({ status, hasSubmission = false }: MilestoneSte
     </div>
   );
 }
+

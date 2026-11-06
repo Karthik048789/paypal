@@ -228,3 +228,4 @@ model AuditLog {
   @@index([actor])
   @@map("audit_logs")
 }
+

@@ -9,6 +9,7 @@
     "lint": "eslint",
     "seed": "tsx prisma/seed.ts",
     "test": "tsx --test tests/**/*.test.ts",
+    "rehearse": "tsx scripts/rehearse-demo.ts",
     "postinstall": "prisma skills sync || exit 0"
   },
   "prisma": {

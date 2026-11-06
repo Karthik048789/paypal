@@ -128,3 +128,4 @@ test('Checklist Validation Rules (FR-6, FR-7)', async (t) => {
     assert.ok(val.errors.some((e) => e.includes('between 3 and 12 items')));
   });
 });
+

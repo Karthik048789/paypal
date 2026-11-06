@@ -240,3 +240,4 @@ export async function approveJobChecklist({
 
   return { checklist: updatedChecklist, bothApproved };
 }
+

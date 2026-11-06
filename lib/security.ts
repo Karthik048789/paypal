@@ -147,3 +147,4 @@ export function buildVoidIdempotencyKey(jobId: string, reason: string): string {
   const sanitizedReason = reason.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 30);
   return `job:${jobId}:void:${sanitizedReason}`;
 }
+

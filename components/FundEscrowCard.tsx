@@ -130,3 +130,4 @@ export function FundEscrowCard({ jobId, amountCents, freelancerEmail, onFunded }
     </div>
   );
 }
+
