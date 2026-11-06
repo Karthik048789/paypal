@@ -48,12 +48,22 @@ export async function GET(
         )
       );
 
-      // 2. Subscribe to event bus for this job
+      // 2. Subscribe to event bus for runs belonging to this job's submissions
+      // Collect all run IDs for this job so we can filter events correctly
+      const jobRunIds = new Set<string>(
+        job.submissions.flatMap((s) => s.runs.map((r) => r.id))
+      );
+
       const unsubscribe = eventBus.subscribe('all', async (event: RunEvent) => {
         try {
-          controller.enqueue(
-            encoder.encode(`event: run_event\ndata: ${JSON.stringify(event)}\n\n`)
-          );
+          // Only forward events that belong to this job's runs
+          if (!event.runId || jobRunIds.has(event.runId)) {
+            // Also add new run IDs dynamically as they are created
+            if (event.runId) jobRunIds.add(event.runId);
+            controller.enqueue(
+              encoder.encode(`event: run_event\ndata: ${JSON.stringify(event)}\n\n`)
+            );
+          }
         } catch {
           // Client disconnected
         }

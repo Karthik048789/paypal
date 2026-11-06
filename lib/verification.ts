@@ -275,10 +275,11 @@ async function executeVerificationRun(
       });
     }
   } else {
-    // Score < 60: HELD state, no capture
-    await transitionJobState(jobId, 'HELD', 'settlement-service', { score: scoreResult.score, runId });
-    emit('payout', `No funds captured per scoring rules (<60). Job state moved to HELD. Re-test eligible.`, {
-      status: 'HELD',
+    // Score < 60 (HELD) or NEEDS_REVIEW: no capture
+    const targetStatus = scoreResult.tier === 'NEEDS_REVIEW' ? 'NEEDS_REVIEW' : 'HELD';
+    await transitionJobState(jobId, targetStatus, 'settlement-service', { score: scoreResult.score, runId });
+    emit('payout', `No funds captured per scoring rules. Job state moved to ${targetStatus}. ${targetStatus === 'HELD' ? 'Re-test eligible.' : 'Flagged for manual Admin review.'}`, {
+      status: targetStatus,
     });
   }
 }

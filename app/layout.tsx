@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import { MobileTabBar } from '@/components/MobileTabBar';
 
 export const metadata: Metadata = {
   title: 'PayGuard Escrow | Autonomous Verification & Payment Settlement',
@@ -13,8 +14,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="min-h-screen bg-slate-50 antialiased font-sans text-slate-900">
+      <body className="min-h-screen bg-slate-50 antialiased font-sans text-slate-900 pb-16 md:pb-0">
         {children}
+        <MobileTabBar />
       </body>
     </html>
   );

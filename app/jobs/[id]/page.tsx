@@ -40,24 +40,28 @@ function JobDetailContent({ params }: { params: Promise<{ id: string }> }) {
   const fetchJob = useCallback(async () => {
     try {
       const res = await fetch(`/api/jobs/${id}`);
+      if (!res.ok) {
+        setLoading(false);
+        return;
+      }
       const data = await res.json();
       if (data.job) {
         setJob(data.job);
 
-        // Auto-switch tabs based on lifecycle state if currently in default
-        if (data.job.status === 'AWAITING_APPROVAL') {
-          setActiveTab('checklist');
-        } else if (data.job.status === 'AWAITING_FUNDING') {
-          setActiveTab('fund');
-        } else if (data.job.status === 'VERIFYING') {
-          setActiveTab('verification');
-          const latestRun = data.job.submissions?.[0]?.runs?.[0];
-          if (latestRun) setActiveRunId(latestRun.id);
-        } else if (['PAID', 'PARTIALLY_PAID', 'HELD'].includes(data.job.status)) {
-          const latestRun = data.job.submissions?.[0]?.runs?.[0];
-          if (latestRun) setActiveRunId(latestRun.id);
-        }
+        // Auto-switch tabs based on lifecycle state — only from 'overview' default
+        setActiveTab((currentTab) => {
+          if (currentTab !== 'overview') return currentTab; // Don't disrupt user's current tab
+          if (data.job.status === 'AWAITING_APPROVAL') return 'checklist';
+          if (data.job.status === 'AWAITING_FUNDING') return 'fund';
+          if (data.job.status === 'VERIFYING') return 'verification';
+          return currentTab;
+        });
+
+        const latestRun = data.job.submissions?.[0]?.runs?.[0];
+        if (latestRun) setActiveRunId(latestRun.id);
       }
+    } catch (err) {
+      console.error('Failed to fetch job:', err);
     } finally {
       setLoading(false);
     }
@@ -125,7 +129,7 @@ function JobDetailContent({ params }: { params: Promise<{ id: string }> }) {
     currentUser?.email.toLowerCase() === job.freelancerEmail.toLowerCase() ||
     currentUser?.role === 'ADMIN';
 
-  const canFund = isClient && (job.status === 'AWAITING_FUNDING' || (latestChecklist?.isLocked && job.status === 'AWAITING_APPROVAL'));
+  const canFund = isClient && job.status === 'AWAITING_FUNDING';
   const canSubmit = isFreelancer && ['FUNDED', 'PARTIALLY_PAID', 'HELD'].includes(job.status);
 
   return (
@@ -389,6 +393,16 @@ function JobDetailContent({ params }: { params: Promise<{ id: string }> }) {
             isFreelancer={isFreelancer}
             onRefresh={fetchJob}
           />
+        )}
+        {activeTab === 'checklist' && !latestChecklist && (
+          <div className="bg-white border border-slate-200 rounded-xl p-12 text-center text-slate-500 text-sm">
+            <FileCheck className="w-10 h-10 text-slate-300 mx-auto mb-3" />
+            <p className="font-semibold text-slate-700 mb-1">No checklist generated yet.</p>
+            <p className="text-xs text-slate-400">The AI checklist is generated when a job is created. Refresh to try again.</p>
+            <button onClick={fetchJob} className="mt-4 px-4 py-2 bg-sky-600 text-white text-xs font-bold rounded-lg hover:bg-sky-700 transition">
+              Refresh
+            </button>
+          </div>
         )}
 
         {/* Tab 3: Fund Escrow Card */}

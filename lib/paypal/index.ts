@@ -253,10 +253,16 @@ export async function voidAuthorization({
       data: { status: 'VOIDED' },
     });
 
-    await tx.job.update({
-      where: { id: jobId },
-      data: { status: 'CANCELLED' },
-    });
+    // Only update job to CANCELLED if it's in a voidable state; DISPUTED jobs
+    // are resolved externally via the dispute route
+    const currentJob = await tx.job.findUnique({ where: { id: jobId }, select: { status: true } });
+    const voidableStatuses = ['FUNDED', 'AWAITING_FUNDING', 'HELD', 'PARTIALLY_PAID', 'DRAFT', 'AWAITING_APPROVAL', 'DISPUTED'];
+    if (currentJob && voidableStatuses.includes(currentJob.status)) {
+      await tx.job.update({
+        where: { id: jobId },
+        data: { status: 'CANCELLED' },
+      });
+    }
 
     await tx.auditLog.create({
       data: {

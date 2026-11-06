@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Link from 'next/navigation';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Shield, User, LogOut, CheckCircle, ArrowRightLeft, Plus } from 'lucide-react';
 import { SessionUser } from '@/lib/auth';
@@ -19,7 +19,7 @@ export function Navbar() {
           setCurrentUser(data.user);
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   const switchDemoRole = async (role: 'CLIENT' | 'FREELANCER' | 'ADMIN') => {
@@ -88,33 +88,30 @@ export function Navbar() {
                 <button
                   onClick={() => switchDemoRole('CLIENT')}
                   disabled={switching}
-                  className={`px-2.5 py-1 rounded font-medium transition ${
-                    currentUser.role === 'CLIENT'
+                  className={`px-2.5 py-1 rounded font-medium transition ${currentUser.role === 'CLIENT'
                       ? 'bg-white text-slate-900 shadow-xs'
                       : 'text-slate-600 hover:text-slate-900'
-                  }`}
+                    }`}
                 >
                   Alice (Client)
                 </button>
                 <button
                   onClick={() => switchDemoRole('FREELANCER')}
                   disabled={switching}
-                  className={`px-2.5 py-1 rounded font-medium transition ${
-                    currentUser.role === 'FREELANCER'
+                  className={`px-2.5 py-1 rounded font-medium transition ${currentUser.role === 'FREELANCER'
                       ? 'bg-white text-slate-900 shadow-xs'
                       : 'text-slate-600 hover:text-slate-900'
-                  }`}
+                    }`}
                 >
                   Bob (Freelancer)
                 </button>
                 <button
                   onClick={() => switchDemoRole('ADMIN')}
                   disabled={switching}
-                  className={`px-2.5 py-1 rounded font-medium transition ${
-                    currentUser.role === 'ADMIN'
+                  className={`px-2.5 py-1 rounded font-medium transition ${currentUser.role === 'ADMIN'
                       ? 'bg-white text-slate-900 shadow-xs'
                       : 'text-slate-600 hover:text-slate-900'
-                  }`}
+                    }`}
                 >
                   Admin
                 </button>

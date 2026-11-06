@@ -52,48 +52,46 @@ export function LiveVerificationView({
     sse.addEventListener('run_event', (e) => {
       try {
         const event: RunEvent = JSON.parse(e.data);
-        if (event.runId === runId || !event.runId) {
-          setEvents((prev) => [...prev, event]);
+        // Only process events for our specific run (or events without a runId that belong to this job)
+        if (event.runId !== runId) return;
 
-          // Handle viewport updates
-          if (event.type === 'viewport' && event.data?.device) {
-            setActiveViewport(event.data.device as 'Desktop' | 'Mobile');
-          }
+        setEvents((prev) => [...prev, event]);
 
-          // Handle step updates
-          if (event.type === 'step') {
-            if (event.data?.step) setActiveStep(Number(event.data.step));
-            if (event.data?.totalSteps) setTotalSteps(Number(event.data.totalSteps));
-            if (event.data?.itemId) {
-              setItemStatuses((prev) => ({
-                ...prev,
-                [event.data!.itemId as string]: 'running',
-              }));
-            }
-          }
+        // Handle viewport updates
+        if (event.type === 'viewport' && event.data?.device) {
+          setActiveViewport(event.data.device as 'Desktop' | 'Mobile');
+        }
 
-          // Handle test result updates
-          if (event.type === 'test_result' && event.data?.itemId) {
-            const result = event.data.result as 'pass' | 'fail';
+        // Handle step updates
+        if (event.type === 'step') {
+          if (event.data?.step) setActiveStep(Number(event.data.step));
+          if (event.data?.totalSteps) setTotalSteps(Number(event.data.totalSteps));
+          if (event.data?.itemId) {
             setItemStatuses((prev) => ({
               ...prev,
-              [event.data!.itemId as string]: result,
+              [event.data!.itemId as string]: 'running',
             }));
           }
+        }
 
-          // Handle score reveal
-          if (event.type === 'score' && event.data?.score !== undefined) {
-            setFinalScore(Number(event.data.score));
-            setFinalTier(String(event.data.tier));
-          }
+        // Handle test result updates
+        if (event.type === 'test_result' && event.data?.itemId) {
+          const result = event.data.result as 'pass' | 'fail';
+          setItemStatuses((prev) => ({
+            ...prev,
+            [event.data!.itemId as string]: result,
+          }));
+        }
 
-          // Handle payout settlement & completion
-          if (event.type === 'payout') {
-            setIsFinished(true);
-            setTimeout(() => {
-              onComplete();
-            }, 3000);
-          }
+        // Handle score reveal
+        if (event.type === 'score' && event.data?.score !== undefined) {
+          setFinalScore(Number(event.data.score));
+          setFinalTier(String(event.data.tier));
+        }
+
+        // Handle payout settlement & completion
+        if (event.type === 'payout') {
+          setIsFinished(true);
         }
       } catch (err) {
         console.error('Failed to parse SSE event:', err);
@@ -103,7 +101,17 @@ export function LiveVerificationView({
     return () => {
       sse.close();
     };
-  }, [jobId, runId, onComplete]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [jobId, runId]); // onComplete intentionally excluded to avoid reconnection loops
+
+  // Trigger onComplete when isFinished becomes true (delayed)
+  useEffect(() => {
+    if (!isFinished) return;
+    const timer = setTimeout(() => {
+      onComplete();
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, [isFinished, onComplete]);
 
   // Auto-scroll activity feed to bottom
   useEffect(() => {

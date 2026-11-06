@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Navbar } from '@/components/Navbar';
 import { StatusBadge } from '@/components/StatusBadge';
 import { Plus, ArrowRight, Shield, DollarSign, CheckCircle2, Clock, Filter, AlertCircle, RefreshCw } from 'lucide-react';
@@ -19,6 +20,7 @@ interface JobSummary {
 }
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [jobs, setJobs] = useState<JobSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('ALL');
@@ -27,6 +29,10 @@ export default function DashboardPage() {
     setLoading(true);
     try {
       const res = await fetch('/api/jobs');
+      if (res.status === 401) {
+        router.push('/auth/login');
+        return;
+      }
       const data = await res.json();
       if (data.jobs) {
         setJobs(data.jobs);

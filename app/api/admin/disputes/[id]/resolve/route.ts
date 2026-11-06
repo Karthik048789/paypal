@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { getCurrentUser } from '@/lib/auth';
 import { captureAuthorization, voidAuthorization } from '@/lib/paypal';
+import { transitionJobState } from '@/lib/state-machine';
 
 export async function POST(
   req: NextRequest,
@@ -61,11 +62,12 @@ export async function POST(
         reason: `Admin dispute resolution void: ${reason}`,
       });
     } else {
-      // uphold
+      // uphold: return to HELD so freelancer can re-test
       newStatus = 'RESOLVED_UPHELD';
-      await prisma.job.update({
-        where: { id: job.id },
-        data: { status: 'HELD' },
+      await transitionJobState(job.id, 'HELD', user.email, {
+        disputeId: id,
+        reason,
+        resolution: 'upheld',
       });
     }
 

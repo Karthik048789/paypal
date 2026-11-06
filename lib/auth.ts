@@ -24,8 +24,10 @@ export function signSessionToken(user: SessionUser): string {
     exp: Date.now() + SESSION_EXPIRY_DAYS * 24 * 60 * 60 * 1000,
   });
   const secret = process.env.SESSION_SECRET || 'payguard-default-session-secret-2026';
-  const hmac = crypto.createHmac('sha256', secret).update(payload).digest('hex');
-  return Buffer.from(payload).toString('base64') + '.' + hmac;
+  const payloadB64 = Buffer.from(payload).toString('base64url');
+  const hmac = crypto.createHmac('sha256', secret).update(payloadB64).digest('hex');
+  // Use '|' as separator — never appears in base64url
+  return `${payloadB64}|${hmac}`;
 }
 
 /**
@@ -33,14 +35,20 @@ export function signSessionToken(user: SessionUser): string {
  */
 export function verifySessionToken(token: string): SessionUser | null {
   try {
-    const [payloadB64, hmac] = token.split('.');
+    // Split on the LAST '|' to handle base64url (no '|' in base64url anyway)
+    const separatorIdx = token.lastIndexOf('|');
+    if (separatorIdx === -1) return null;
+
+    const payloadB64 = token.slice(0, separatorIdx);
+    const hmac = token.slice(separatorIdx + 1);
     if (!payloadB64 || !hmac) return null;
 
     const secret = process.env.SESSION_SECRET || 'payguard-default-session-secret-2026';
-    const payload = Buffer.from(payloadB64, 'base64').toString('utf8');
-    const expectedHmac = crypto.createHmac('sha256', secret).update(payload).digest('hex');
+    const payload = Buffer.from(payloadB64, 'base64url').toString('utf8');
+    const expectedHmac = crypto.createHmac('sha256', secret).update(payloadB64).digest('hex');
 
-    if (hmac !== expectedHmac) return null;
+    // Constant-time comparison to prevent timing attacks
+    if (!crypto.timingSafeEqual(Buffer.from(hmac, 'hex'), Buffer.from(expectedHmac, 'hex'))) return null;
 
     const data = JSON.parse(payload);
     if (Date.now() > data.exp) return null; // Expired
