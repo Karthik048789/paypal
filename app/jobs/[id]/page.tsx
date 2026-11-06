@@ -1,0 +1,474 @@
+'use client';
+
+import React, { use, useEffect, useState, useCallback, Suspense } from 'react';
+import { useRouter } from 'next/navigation';
+import { Navbar } from '@/components/Navbar';
+import { StatusBadge } from '@/components/StatusBadge';
+import { MilestoneStepper } from '@/components/MilestoneStepper';
+import { ChecklistEditor } from '@/components/ChecklistEditor';
+import { FundEscrowCard } from '@/components/FundEscrowCard';
+import { SubmitWorkModal } from '@/components/SubmitWorkModal';
+import { LiveVerificationView } from '@/components/LiveVerificationView';
+import { DecisionReport } from '@/components/DecisionReport';
+import { DisputeModal } from '@/components/DisputeModal';
+import { SessionUser } from '@/lib/auth';
+import {
+  Shield,
+  FileCheck,
+  CreditCard,
+  Send,
+  Eye,
+  FileText,
+  AlertTriangle,
+  RefreshCw,
+  ExternalLink,
+  Lock,
+} from 'lucide-react';
+
+function JobDetailContent({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
+  const router = useRouter();
+
+  const [job, setJob] = useState<any>(null);
+  const [currentUser, setCurrentUser] = useState<SessionUser | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<'overview' | 'checklist' | 'fund' | 'verification' | 'report'>('overview');
+  const [showSubmitModal, setShowSubmitModal] = useState(false);
+  const [showDisputeModal, setShowDisputeModal] = useState(false);
+  const [activeRunId, setActiveRunId] = useState<string | null>(null);
+
+  const fetchJob = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/jobs/${id}`);
+      const data = await res.json();
+      if (data.job) {
+        setJob(data.job);
+
+        // Auto-switch tabs based on lifecycle state if currently in default
+        if (data.job.status === 'AWAITING_APPROVAL') {
+          setActiveTab('checklist');
+        } else if (data.job.status === 'AWAITING_FUNDING') {
+          setActiveTab('fund');
+        } else if (data.job.status === 'VERIFYING') {
+          setActiveTab('verification');
+          const latestRun = data.job.submissions?.[0]?.runs?.[0];
+          if (latestRun) setActiveRunId(latestRun.id);
+        } else if (['PAID', 'PARTIALLY_PAID', 'HELD'].includes(data.job.status)) {
+          const latestRun = data.job.submissions?.[0]?.runs?.[0];
+          if (latestRun) setActiveRunId(latestRun.id);
+        }
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
+
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.user) setCurrentUser(data.user);
+      })
+      .catch(() => {});
+
+    fetchJob();
+  }, [fetchJob]);
+
+  // Live SSE listener for status updates (FR-31: timeline updates within 2s with no refresh)
+  useEffect(() => {
+    const sse = new EventSource(`/api/jobs/${id}/events`);
+
+    sse.addEventListener('run_event', (e) => {
+      try {
+        const event = JSON.parse(e.data);
+        if (event.type === 'payout' || event.type === 'score') {
+          // Re-fetch job data when score or payout occurs
+          fetchJob();
+        }
+      } catch (err) {
+        console.error('SSE parse error:', err);
+      }
+    });
+
+    return () => {
+      sse.close();
+    };
+  }, [id, fetchJob]);
+
+  if (loading && !job) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center text-slate-500 text-sm">
+        <RefreshCw className="w-5 h-5 animate-spin mr-2 text-sky-600" />
+        Loading escrow details...
+      </div>
+    );
+  }
+
+  if (!job) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
+        <h2 className="text-xl font-bold text-slate-800">Job Not Found</h2>
+        <a href="/dashboard" className="text-xs text-sky-600 mt-2 font-semibold">
+          Return to Dashboard
+        </a>
+      </div>
+    );
+  }
+
+  const latestChecklist = job.checklists?.[0];
+  const latestSubmission = job.submissions?.[0];
+  const latestRun = latestSubmission?.runs?.[0];
+
+  const isClient = currentUser?.id === job.clientId || currentUser?.role === 'ADMIN';
+  const isFreelancer =
+    currentUser?.id === job.freelancerId ||
+    currentUser?.email.toLowerCase() === job.freelancerEmail.toLowerCase() ||
+    currentUser?.role === 'ADMIN';
+
+  const canFund = isClient && (job.status === 'AWAITING_FUNDING' || (latestChecklist?.isLocked && job.status === 'AWAITING_APPROVAL'));
+  const canSubmit = isFreelancer && ['FUNDED', 'PARTIALLY_PAID', 'HELD'].includes(job.status);
+
+  return (
+    <div className="min-h-screen bg-slate-50 text-slate-900 pb-20">
+      <Navbar />
+
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Top Header Card */}
+        <div className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-xs mb-8">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-slate-100">
+            <div>
+              <div className="flex items-center gap-3 mb-2 flex-wrap">
+                <StatusBadge status={job.status} />
+                <span className="text-xs text-slate-400 font-mono">Job ID: {job.id.slice(0, 8)}...</span>
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+                {job.title}
+              </h1>
+              <p className="text-xs text-slate-500 mt-1 max-w-2xl line-clamp-2">
+                {job.requirements}
+              </p>
+            </div>
+
+            <div className="flex flex-col sm:items-end flex-shrink-0">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                Total Escrow Value
+              </span>
+              <span className="text-3xl font-extrabold text-slate-900 font-mono">
+                ${(job.amount / 100).toFixed(2)} USD
+              </span>
+              <span className="text-[11px] text-slate-400 mt-0.5">
+                Target Deadline: {new Date(job.deadline).toLocaleDateString()}
+              </span>
+            </div>
+          </div>
+
+          {/* Parties & Metadata Grid */}
+          <div className="pt-6 grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+            <div className="p-3 bg-slate-50 rounded-lg border border-slate-100">
+              <span className="text-slate-400 font-medium block mb-0.5">Client (Depositor)</span>
+              <span className="font-bold text-slate-800">{job.client.name}</span>
+              <span className="text-slate-500 block truncate">{job.client.email}</span>
+            </div>
+
+            <div className="p-3 bg-slate-50 rounded-lg border border-slate-100">
+              <span className="text-slate-400 font-medium block mb-0.5">Freelancer (Payee)</span>
+              <span className="font-bold text-slate-800">
+                {job.freelancer?.name || 'Invited Freelancer'}
+              </span>
+              <span className="text-slate-500 block truncate">{job.freelancerEmail}</span>
+            </div>
+
+            <div className="p-3 bg-slate-50 rounded-lg border border-slate-100 flex flex-col justify-center">
+              <span className="text-slate-400 font-medium block mb-1">Current Action Required:</span>
+              <span className="font-bold text-sky-700">
+                {job.status === 'AWAITING_APPROVAL' && 'Both parties must review and approve checklist'}
+                {job.status === 'AWAITING_FUNDING' && 'Client must authorize PayPal escrow hold'}
+                {job.status === 'FUNDED' && 'Freelancer must build deliverable and submit live URL'}
+                {job.status === 'VERIFYING' && 'Cloud browser agent is executing test rubric...'}
+                {job.status === 'PAID' && 'Completed: 100% payout released to freelancer'}
+                {job.status === 'PARTIALLY_PAID' && '70% released. Freelancer can submit fixes for remaining 30%'}
+                {job.status === 'HELD' && '0% released. Freelancer can fix issues and request a re-test'}
+                {job.status === 'DISPUTED' && 'Under active review by PayGuard Admin arbitration'}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Milestone Stepper Timeline (FR-31) */}
+        <div className="mb-8">
+          <MilestoneStepper status={job.status} hasSubmission={Boolean(latestSubmission)} />
+        </div>
+
+        {/* Navigation Tabs (Section 4.3) */}
+        <div className="flex border-b border-slate-200 mb-8 overflow-x-auto gap-2">
+          <button
+            onClick={() => setActiveTab('overview')}
+            className={`pb-3 px-4 text-xs font-bold uppercase tracking-wider flex items-center gap-2 border-b-2 transition ${
+              activeTab === 'overview'
+                ? 'border-sky-600 text-sky-600'
+                : 'border-transparent text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            <Shield className="w-4 h-4" />
+            <span>Overview & Actions</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('checklist')}
+            className={`pb-3 px-4 text-xs font-bold uppercase tracking-wider flex items-center gap-2 border-b-2 transition ${
+              activeTab === 'checklist'
+                ? 'border-sky-600 text-sky-600'
+                : 'border-transparent text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            <FileCheck className="w-4 h-4" />
+            <span>AI Checklist ({latestChecklist?.items?.length || 0})</span>
+          </button>
+
+          {canFund && (
+            <button
+              onClick={() => setActiveTab('fund')}
+              className={`pb-3 px-4 text-xs font-bold uppercase tracking-wider flex items-center gap-2 border-b-2 transition ${
+                activeTab === 'fund'
+                  ? 'border-sky-600 text-sky-600'
+                  : 'border-transparent text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              <CreditCard className="w-4 h-4" />
+              <span>Fund Escrow</span>
+            </button>
+          )}
+
+          {(job.status === 'VERIFYING' || activeRunId) && (
+            <button
+              onClick={() => setActiveTab('verification')}
+              className={`pb-3 px-4 text-xs font-bold uppercase tracking-wider flex items-center gap-2 border-b-2 transition ${
+                activeTab === 'verification'
+                  ? 'border-sky-600 text-sky-600'
+                  : 'border-transparent text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              <Eye className="w-4 h-4" />
+              <span>Live Verification</span>
+            </button>
+          )}
+
+          {latestRun?.reports?.length > 0 && (
+            <button
+              onClick={() => setActiveTab('report')}
+              className={`pb-3 px-4 text-xs font-bold uppercase tracking-wider flex items-center gap-2 border-b-2 transition ${
+                activeTab === 'report'
+                  ? 'border-sky-600 text-sky-600'
+                  : 'border-transparent text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              <FileText className="w-4 h-4" />
+              <span>Decision Report</span>
+            </button>
+          )}
+        </div>
+
+        {/* Tab 1: Overview & Primary Actions */}
+        {activeTab === 'overview' && (
+          <div className="space-y-8">
+            {/* Contextual Action CTA Box */}
+            <div className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-xs flex flex-col md:flex-row items-center justify-between gap-6">
+              <div className="space-y-1">
+                <h3 className="text-lg font-bold text-slate-900">
+                  {job.status === 'AWAITING_APPROVAL' && 'Step 1: Review & Lock Checklist'}
+                  {job.status === 'AWAITING_FUNDING' && 'Step 2: Deposit Escrow Hold in PayPal'}
+                  {job.status === 'FUNDED' && 'Step 3: Deliverable Ready? Submit Live URL'}
+                  {job.status === 'VERIFYING' && 'AI Cloud Browser is Verifying Work'}
+                  {job.status === 'PAID' && 'Escrow Fully Settled (100% Paid)'}
+                  {job.status === 'PARTIALLY_PAID' && 'Partial Settlement: Re-test Available'}
+                  {job.status === 'HELD' && 'Verification Incomplete: Re-test Available'}
+                  {job.status === 'DISPUTED' && 'Dispute Arbitration in Progress'}
+                </h3>
+                <p className="text-xs text-slate-500 max-w-xl">
+                  {job.status === 'AWAITING_APPROVAL' && 'Both parties must verify that the 100-point rubric correctly reflects project deliverables before money is locked.'}
+                  {job.status === 'AWAITING_FUNDING' && 'Authorize the escrow hold through PayPal sandbox. Funds stay protected until verification completes.'}
+                  {job.status === 'FUNDED' && 'The escrow hold is locked. Freelancer can now submit their HTTPS staging or production URL to initiate automated cloud testing.'}
+                  {job.status === 'VERIFYING' && 'Watch live viewport assertions, responsive audits, and console error checks in real-time.'}
+                  {['PAID', 'PARTIALLY_PAID', 'HELD'].includes(job.status) && 'The deterministic scoring engine has evaluated the deliverable and executed settlement.'}
+                </p>
+              </div>
+
+              <div className="flex gap-3 flex-shrink-0">
+                {job.status === 'AWAITING_APPROVAL' && (
+                  <button
+                    onClick={() => setActiveTab('checklist')}
+                    className="px-5 py-2.5 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold rounded-lg shadow-sm transition"
+                  >
+                    Go to Checklist Review →
+                  </button>
+                )}
+
+                {canFund && (
+                  <button
+                    onClick={() => setActiveTab('fund')}
+                    className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-sm transition"
+                  >
+                    Authorize PayPal Hold →
+                  </button>
+                )}
+
+                {canSubmit && (
+                  <button
+                    onClick={() => setShowSubmitModal(true)}
+                    className="px-5 py-2.5 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold rounded-lg shadow-sm transition inline-flex items-center gap-1.5"
+                  >
+                    <Send className="w-3.5 h-3.5" />
+                    <span>Submit Live Deliverable URL</span>
+                  </button>
+                )}
+
+                {job.status === 'VERIFYING' && (
+                  <button
+                    onClick={() => setActiveTab('verification')}
+                    className="px-5 py-2.5 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold rounded-lg shadow-sm transition"
+                  >
+                    Watch Live Cloud Agent →
+                  </button>
+                )}
+
+                {latestRun?.reports?.length > 0 && (
+                  <button
+                    onClick={() => setActiveTab('report')}
+                    className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-lg shadow-sm transition"
+                  >
+                    View Decision Report →
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Embedded Checklist Preview */}
+            {latestChecklist && (
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500">
+                    Approved Test Rubric
+                  </h3>
+                  <button
+                    onClick={() => setActiveTab('checklist')}
+                    className="text-xs font-semibold text-sky-600 hover:underline"
+                  >
+                    Full Checklist Editor →
+                  </button>
+                </div>
+                <div className="bg-white rounded-xl border border-slate-200 divide-y divide-slate-100">
+                  {latestChecklist.items.map((item: any, idx: number) => (
+                    <div key={item.id} className="p-4 flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-3">
+                        <span className="font-mono text-slate-400 font-bold">#{idx + 1}</span>
+                        <div>
+                          <span className="font-bold text-slate-800">{item.description}</span>
+                          <span className="text-slate-400 ml-2 font-mono uppercase text-[10px]">
+                            [{item.testType}]
+                          </span>
+                        </div>
+                      </div>
+                      <span className="px-2.5 py-1 rounded bg-slate-100 text-slate-700 font-bold font-mono">
+                        {item.weight} pts
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Tab 2: Checklist Review & Edit */}
+        {activeTab === 'checklist' && latestChecklist && (
+          <ChecklistEditor
+            jobId={job.id}
+            checklist={latestChecklist}
+            jobStatus={job.status}
+            isClient={isClient}
+            isFreelancer={isFreelancer}
+            onRefresh={fetchJob}
+          />
+        )}
+
+        {/* Tab 3: Fund Escrow Card */}
+        {activeTab === 'fund' && (
+          <FundEscrowCard
+            jobId={job.id}
+            amountCents={job.amount}
+            freelancerEmail={job.freelancerEmail}
+            onFunded={() => {
+              fetchJob();
+              setActiveTab('overview');
+            }}
+          />
+        )}
+
+        {/* Tab 4: Live Verification Screen */}
+        {activeTab === 'verification' && latestChecklist && (
+          <LiveVerificationView
+            jobId={job.id}
+            runId={activeRunId || 'run-preview'}
+            checklistItems={latestChecklist.items}
+            onComplete={() => {
+              fetchJob();
+              setActiveTab('report');
+            }}
+          />
+        )}
+
+        {/* Tab 5: Decision Report */}
+        {activeTab === 'report' && latestRun && (
+          <DecisionReport
+            job={job}
+            run={latestRun}
+            onRetest={() => setShowSubmitModal(true)}
+            onOpenDispute={() => setShowDisputeModal(true)}
+          />
+        )}
+
+        {/* Submit Work Modal (FR-14) */}
+        {showSubmitModal && latestChecklist && (
+          <SubmitWorkModal
+            jobId={job.id}
+            checklistItems={latestChecklist.items}
+            onSubmitted={(runId) => {
+              setShowSubmitModal(false);
+              setActiveRunId(runId);
+              setActiveTab('verification');
+              fetchJob();
+            }}
+            onClose={() => setShowSubmitModal(false)}
+          />
+        )}
+
+        {/* Dispute Modal (FR-33) */}
+        {showDisputeModal && (
+          <DisputeModal
+            jobId={job.id}
+            onDisputeOpened={() => {
+              setShowDisputeModal(false);
+              fetchJob();
+            }}
+            onClose={() => setShowDisputeModal(false)}
+          />
+        )}
+      </main>
+    </div>
+  );
+}
+
+export default function JobDetailPage(props: { params: Promise<{ id: string }> }) {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-slate-50 flex items-center justify-center text-slate-500 text-sm">
+          <RefreshCw className="w-5 h-5 animate-spin mr-2 text-sky-600" />
+          Loading escrow contract...
+        </div>
+      }
+    >
+      <JobDetailContent {...props} />
+    </Suspense>
+  );
+}
