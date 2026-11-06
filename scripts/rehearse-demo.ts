@@ -81,9 +81,19 @@ async function runSingleRehearsal(iteration: number, tierTarget: '100' | '70' | 
   });
   console.log(`✓ [Step 5] Work submitted. Cloud Browser verification triggered (Run ID: ${runId}).`);
 
-  // Wait for verification run simulation to finish
+  // Wait for verification run simulation to finish (poll until status !== 'RUNNING')
   console.log(`... Cloud agent executing tests & deterministic scoring ...`);
-  await new Promise((resolve) => setTimeout(resolve, 8000));
+  let pollAttempts = 0;
+  while (pollAttempts < 40) {
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    pollAttempts++;
+    const checkRun = await prisma.verificationRun.findUnique({
+      where: { id: runId },
+    });
+    if (checkRun && checkRun.status !== 'RUNNING') {
+      break;
+    }
+  }
 
   // Step 6: Verify Settlement & Idempotency
   const finishedJob = await prisma.job.findUnique({

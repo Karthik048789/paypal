@@ -128,7 +128,7 @@ async function executeVerificationRun(
   // if url contains "mobile-broken" -> 70% partial
   // otherwise -> 100% pass
   const isMobileBroken = targetUrl.includes('mobile-broken') || targetUrl.includes('70');
-  const isBrokenLogin = targetUrl.includes('broken-login') || targetUrl.includes('broken') || targetUrl.includes('fail');
+  const isBrokenLogin = targetUrl.includes('broken-login') || targetUrl.includes('broken-auth') || (targetUrl.includes('fail') && !isMobileBroken);
 
   let stepCounter = 2;
 
