@@ -107,9 +107,9 @@ export interface AuthStatus {
   authId?: string;
   orderId?: string;
   amountCents: number;
-  capturedCents?: number;
+  capturedCents: number;
   capturedAmountCents?: number;
-  remainingCents?: number;
+  remainingCents: number;
   status: string;
   expiresAt?: Date | string | null;
 }
