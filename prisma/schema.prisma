@@ -1,0 +1,231 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String
+  passwordHash  String    @map("password_hash")
+  paypalEmail   String?   @map("paypal_email")
+  role          String    @default("CLIENT") // CLIENT | FREELANCER | ADMIN
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  clientJobs     Job[]     @relation("ClientJobs")
+  freelancerJobs Job[]     @relation("FreelancerJobs")
+  disputes       Dispute[]
+
+  @@map("users")
+}
+
+model Job {
+  id              String    @id @default(cuid())
+  clientId        String    @map("client_id")
+  freelancerId    String?   @map("freelancer_id")
+  freelancerEmail String    @map("freelancer_email")
+  title           String
+  requirements    String
+  amount          Int       // Integer cents (e.g. $1000 = 100000)
+  currency        String    @default("USD")
+  status          String    @default("DRAFT") // DRAFT, AWAITING_APPROVAL, AWAITING_FUNDING, FUNDED, VERIFYING, PAID, PARTIALLY_PAID, HELD, NEEDS_REVIEW, DISPUTED, EXPIRED, CANCELLED
+  deadline        DateTime
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  client          User      @relation("ClientJobs", fields: [clientId], references: [id])
+  freelancer      User?     @relation("FreelancerJobs", fields: [freelancerId], references: [id])
+
+  checklists            Checklist[]
+  paymentAuthorizations PaymentAuthorization[]
+  submissions           Submission[]
+  paymentEvents         PaymentEvent[]
+  disputes              Dispute[]
+
+  @@index([clientId])
+  @@index([freelancerId])
+  @@index([status])
+  @@map("jobs")
+}
+
+model Checklist {
+  id                     String    @id @default(cuid())
+  jobId                  String    @map("job_id")
+  version                Int       @default(1)
+  isLocked               Boolean   @default(false) @map("is_locked")
+  approvedByClientAt     DateTime? @map("approved_by_client_at")
+  approvedByFreelancerAt DateTime? @map("approved_by_freelancer_at")
+  createdAt              DateTime  @default(now()) @map("created_at")
+  updatedAt              DateTime  @updatedAt @map("updated_at")
+
+  job                    Job       @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  items                  ChecklistItem[]
+
+  @@index([jobId])
+  @@map("checklists")
+}
+
+model ChecklistItem {
+  id          String   @id @default(cuid())
+  checklistId String   @map("checklist_id")
+  description String
+  testType    String   @map("test_type") // functional, responsive, console_errors, content_present, navigation
+  criteria    String
+  weight      Int      // 1 to 60, total sum must equal 100
+  critical    Boolean  @default(false)
+  orderIndex  Int      @default(0) @map("order_index")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  checklist   Checklist @relation(fields: [checklistId], references: [id], onDelete: Cascade)
+  testResults TestResult[]
+
+  @@index([checklistId])
+  @@map("checklist_items")
+}
+
+model PaymentAuthorization {
+  id             String    @id @default(cuid())
+  jobId          String    @map("job_id")
+  paypalOrderId  String?   @map("paypal_order_id")
+  paypalAuthId   String?   @map("paypal_auth_id")
+  amount         Int       // Integer cents
+  capturedAmount Int       @default(0) @map("captured_amount")
+  status         String    @default("CREATED") // CREATED, AUTHORIZED, PARTIALLY_CAPTURED, COMPLETELY_CAPTURED, VOIDED, EXPIRED
+  expiresAt      DateTime? @map("expires_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  job            Job       @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@index([jobId])
+  @@index([status])
+  @@index([expiresAt])
+  @@map("payment_authorizations")
+}
+
+model Submission {
+  id                   String            @id @default(cuid())
+  jobId                String            @map("job_id")
+  url                  String
+  credentialsEncrypted String?           @map("credentials_encrypted") // AES-256-GCM encrypted
+  notes                String?
+  createdAt            DateTime          @default(now()) @map("created_at")
+
+  job                  Job               @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  runs                 VerificationRun[]
+
+  @@index([jobId])
+  @@map("submissions")
+}
+
+model VerificationRun {
+  id              String       @id @default(cuid())
+  submissionId    String       @map("submission_id")
+  status          String       @default("RUNNING") // RUNNING, COMPLETED, FAILED, NEEDS_REVIEW, ERRORED
+  score           Int?
+  startedAt       DateTime     @default(now()) @map("started_at")
+  endedAt         DateTime?    @map("ended_at")
+  kernelSessionId String?      @map("kernel_session_id")
+  replayUrl       String?      @map("replay_url")
+  createdAt       DateTime     @default(now()) @map("created_at")
+
+  submission      Submission   @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  testResults     TestResult[]
+  reports         Report[]
+
+  @@index([submissionId])
+  @@index([status])
+  @@map("verification_runs")
+}
+
+model TestResult {
+  id                    String          @id @default(cuid())
+  runId                 String          @map("run_id")
+  itemId                String          @map("item_id")
+  result                String          // pass, fail, inconclusive
+  evidenceScreenshotUrl String?         @map("evidence_screenshot_url")
+  logExcerpt            String?         @map("log_excerpt")
+  explanation           String?
+  attempts              Int             @default(1)
+  createdAt             DateTime        @default(now()) @map("created_at")
+
+  run                   VerificationRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+  item                  ChecklistItem   @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@index([runId])
+  @@index([itemId])
+  @@map("test_results")
+}
+
+model PaymentEvent {
+  id             String   @id @default(cuid())
+  jobId          String   @map("job_id")
+  type           String   // authorize, capture, void, reauthorize, invoice
+  amount         Int      // Integer cents
+  paypalRef      String?  @map("paypal_ref")
+  idempotencyKey String   @unique @map("idempotency_key") // Unique constraint to prevent double execution
+  metadata       String?
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  job            Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@index([jobId])
+  @@index([idempotencyKey])
+  @@map("payment_events")
+}
+
+model Report {
+  id            String          @id @default(cuid())
+  runId         String          @map("run_id")
+  summary       String
+  reasoning     String
+  payoutAmount  Int             @map("payout_amount") // Cents
+  payoutPercent Int             @map("payout_percent") // e.g. 100, 70, 0
+  createdAt     DateTime        @default(now()) @map("created_at")
+
+  run           VerificationRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+
+  @@index([runId])
+  @@map("reports")
+}
+
+model Dispute {
+  id          String    @id @default(cuid())
+  jobId       String    @map("job_id")
+  openedBy    String    @map("opened_by")
+  reason      String
+  status      String    @default("OPEN") // OPEN, UNDER_REVIEW, RESOLVED_UPHELD, RESOLVED_OVERRIDDEN, RESOLVED_VOIDED
+  resolution  String?
+  resolvedBy  String?   @map("resolved_by")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  resolvedAt  DateTime? @map("resolved_at")
+
+  job         Job       @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [openedBy], references: [id], onDelete: Cascade)
+
+  @@index([jobId])
+  @@index([openedBy])
+  @@index([status])
+  @@map("disputes")
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  actor     String
+  action    String
+  entity    String
+  entityId  String?  @map("entity_id")
+  before    String?
+  after     String?
+  timestamp DateTime @default(now())
+
+  @@index([entity, entityId])
+  @@index([actor])
+  @@map("audit_logs")
+}
+

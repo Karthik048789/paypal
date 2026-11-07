@@ -1,31 +1,51 @@
 {
   "name": "payguard-escrow",
   "version": "1.0.0",
+  "private": true,
   "description": "PayGuard Escrow: Autonomous AI payment verification & deterministic escrow release",
-  "type": "module",
   "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "seed": "tsx prisma/seed.ts",
     "test": "vitest run",
-    "test:watch": "vitest",
+    "test:node": "tsx --test tests/**/*.test.ts",
+    "rehearse": "tsx scripts/rehearse-demo.ts",
     "worker": "tsx worker/index.ts",
     "demo:serve": "tsx demo-sites/server.ts",
-    "build": "tsc"
+    "postinstall": "prisma skills sync || exit 0"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
+    "@prisma/client": "^6.4.1",
+    "bcryptjs": "^3.0.3",
+    "clsx": "^2.1.1",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
+    "lucide-react": "^1.70.0",
+    "next": "16.4.5",
     "playwright": "^1.49.0",
+    "prisma": "^6.4.1",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "tailwind-merge": "^3.7.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@tailwindcss/turbopack": "^4",
+    "@types/bcryptjs": "^2.4.6",
     "@types/express": "^4.17.21",
     "@types/node": "^22.9.0",
-    "tsx": "^4.19.2",
-    "typescript": "^5.6.3",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.4.5",
+    "tailwindcss": "^4",
+    "tsx": "^4.23.15",
+    "typescript": "^5",
     "vitest": "^2.1.4"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild"
-    ]
   }
 }

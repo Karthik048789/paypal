@@ -1,7 +1,5 @@
-/**
- * PayGuard Escrow - Shared TypeScript Types & Contracts
- * Shared between Member A (Platform & UI) and Member B (Agent & Scoring Engine)
- */
+// PayGuard Escrow - Shared Team Contracts & Type Definitions
+// Unified for Member A (Platform & UI) and Member B (Agent & Scoring Engine)
 
 export type JobStatus =
   | 'DRAFT'
@@ -17,6 +15,8 @@ export type JobStatus =
   | 'EXPIRED'
   | 'CANCELLED';
 
+export type UserRole = 'CLIENT' | 'FREELANCER' | 'ADMIN';
+
 export type TestType =
   | 'functional'
   | 'responsive'
@@ -24,38 +24,44 @@ export type TestType =
   | 'content_present'
   | 'navigation';
 
-export interface ChecklistItem {
-  id: string;
+export type TestResultStatus = 'pass' | 'fail' | 'inconclusive';
+export type TestOutcome = TestResultStatus;
+
+export interface ChecklistItemDTO {
+  id?: string;
   checklistId?: string;
   description: string;
   testType: TestType;
   criteria: string;
-  weight: number; // 1-60, must sum to 100
-  critical: boolean; // Hard-fail: if true and fails, score = 0
+  weight: number; // 1-60, total checklist sum must be 100
+  critical?: boolean;
+  orderIndex?: number;
 }
 
-export type TestOutcome = 'pass' | 'fail' | 'inconclusive';
+export type ChecklistItem = ChecklistItemDTO & { id: string; critical: boolean };
 
-export interface TestResult {
+export interface TestResultDTO {
   id?: string;
   runId?: string;
   itemId: string;
-  result: TestOutcome;
+  result: TestResultStatus;
   evidenceScreenshotUrl?: string;
   logExcerpt?: string;
-  explanation: string;
-  attempts: number; // up to 3 runs via majority vote
+  explanation?: string;
+  attempts?: number;
 }
+
+export type TestResult = TestResultDTO & { explanation: string; attempts: number };
 
 export type ScoreTier = 'PAID' | 'PARTIALLY_PAID' | 'HELD' | 'NEEDS_REVIEW';
 
 export interface RunResult {
   runId: string;
-  jobId: string;
-  score: number; // 0 - 100
+  jobId?: string;
+  score: number;
   tier: ScoreTier;
-  payoutPercent: number; // 100, 70, or 0
-  results: TestResult[];
+  payoutPercent: number;
+  results: TestResultDTO[];
   reportId?: string;
   summary?: string;
   reasoning?: string;
@@ -69,31 +75,54 @@ export type RunEventType =
   | 'payout'
   | 'error';
 
+// Activity feed event protocol emitted during live verification runs
 export interface RunEvent {
   runId: string;
-  jobId: string;
+  jobId?: string;
   type: RunEventType;
   message: string;
-  data?: Record<string, any>;
+  data?: Record<string, any> | null;
   ts: number;
 }
 
+// Member A Payment Interfaces
 export interface PaymentResult {
   success: boolean;
+  captureId?: string;
   transactionId?: string;
-  status: 'COMPLETED' | 'PENDING' | 'VOIDED' | 'FAILED';
+  orderId?: string;
+  authId?: string;
+  amountCents?: number;
   amountCapturedCents?: number;
   amountVoidedCents?: number;
-  error?: string;
+  status: string;
   idempotencyKey: string;
+  error?: string;
+  rawResponse?: Record<string, unknown>;
+  message?: string;
 }
 
 export interface AuthStatus {
   jobId: string;
-  authId: string;
-  status: 'CREATED' | 'AUTHORIZED' | 'CAPTURED' | 'VOIDED' | 'EXPIRED';
+  authId?: string;
+  orderId?: string;
   amountCents: number;
-  capturedAmountCents: number;
-  expiresAt: string;
+  capturedCents?: number;
+  capturedAmountCents?: number;
+  remainingCents?: number;
+  status: string;
+  expiresAt?: Date | string | null;
 }
 
+// Timeline Stepper State Representation
+export type MilestoneState = 'COMPLETED' | 'ACTIVE' | 'PENDING' | 'FAILED';
+
+export interface MilestoneItem {
+  id: string;
+  label: string;
+  status: MilestoneState;
+  color: 'gray' | 'blue' | 'green' | 'yellow' | 'red';
+  hex: string;
+  icon: string;
+  timestamp?: string;
+}
