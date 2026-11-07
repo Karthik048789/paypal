@@ -1,0 +1,31 @@
+{
+  "name": "payguard-escrow",
+  "version": "1.0.0",
+  "description": "PayGuard Escrow: Autonomous AI payment verification & deterministic escrow release",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "worker": "tsx worker/index.ts",
+    "demo:serve": "tsx demo-sites/server.ts",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "playwright": "^1.49.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.9.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.4"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  }
+}
