@@ -4,6 +4,9 @@
   "private": true,
   "description": "PayGuard Escrow: Autonomous AI payment verification & deterministic escrow release",
   "scripts": {
+    "predev": "node scripts/build-css.mjs",
+    "prebuild": "node scripts/build-css.mjs",
+    "build:css": "node scripts/build-css.mjs",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
