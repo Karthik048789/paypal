@@ -121,57 +121,76 @@ export async function captureAuthorization({
   const newAuthStatus = finalCapture ? 'COMPLETELY_CAPTURED' : 'PARTIALLY_CAPTURED';
 
   // 4. In a SINGLE database transaction: write PaymentEvent, update Authorization, update Job state, write AuditLog
-  await prisma.$transaction(async (tx) => {
-    // Record append-only PaymentEvent with unique idempotencyKey
-    await tx.paymentEvent.create({
-      data: {
-        jobId,
-        type: 'capture',
-        amount: amountCents,
-        paypalRef: captureId,
-        idempotencyKey,
-        metadata: JSON.stringify({
-          runId,
-          finalCapture,
-          authId: activeAuth.paypalAuthId,
-        }),
-      },
-    });
-
-    // Update PaymentAuthorization
-    await tx.paymentAuthorization.update({
-      where: { id: activeAuth.id },
-      data: {
-        capturedAmount: newCapturedTotal,
-        status: newAuthStatus,
-      },
-    });
-
-    // Update Job state
-    await tx.job.update({
-      where: { id: jobId },
-      data: {
-        status: nextJobStatus,
-      },
-    });
-
-    // Audit log entry
-    await tx.auditLog.create({
-      data: {
-        actor: 'settlement-service',
-        action: 'PAYMENT_CAPTURED',
-        entity: 'Job',
-        entityId: jobId,
-        before: JSON.stringify({ status: job.status, capturedAmount: activeAuth.capturedAmount }),
-        after: JSON.stringify({
-          status: nextJobStatus,
-          capturedAmount: newCapturedTotal,
-          captureId,
+  try {
+    await prisma.$transaction(async (tx) => {
+      // Record append-only PaymentEvent with unique idempotencyKey
+      await tx.paymentEvent.create({
+        data: {
+          jobId,
+          type: 'capture',
+          amount: amountCents,
+          paypalRef: captureId,
           idempotencyKey,
-        }),
-      },
+          metadata: JSON.stringify({
+            runId,
+            finalCapture,
+            authId: activeAuth.paypalAuthId,
+          }),
+        },
+      });
+
+      // Update PaymentAuthorization
+      await tx.paymentAuthorization.update({
+        where: { id: activeAuth.id },
+        data: {
+          capturedAmount: newCapturedTotal,
+          status: newAuthStatus,
+        },
+      });
+
+      // Update Job state
+      await tx.job.update({
+        where: { id: jobId },
+        data: {
+          status: nextJobStatus,
+        },
+      });
+
+      // Audit log entry
+      await tx.auditLog.create({
+        data: {
+          actor: 'settlement-service',
+          action: 'PAYMENT_CAPTURED',
+          entity: 'Job',
+          entityId: jobId,
+          before: JSON.stringify({ status: job.status, capturedAmount: activeAuth.capturedAmount }),
+          after: JSON.stringify({
+            status: nextJobStatus,
+            capturedAmount: newCapturedTotal,
+            captureId,
+            idempotencyKey,
+          }),
+        },
+      });
     });
-  });
+  } catch (err: any) {
+    // If a concurrent transaction already inserted this idempotency key, honor idempotent response
+    if (err?.code === 'P2002' && (String(err?.meta?.target || '').includes('idempotency_key') || String(err).includes('idempotency_key'))) {
+      const existing = await prisma.paymentEvent.findUnique({
+        where: { idempotencyKey },
+      });
+      if (existing) {
+        return {
+          success: true,
+          captureId: existing.paypalRef || undefined,
+          amountCents: existing.amount,
+          status: 'ALREADY_CAPTURED',
+          idempotencyKey,
+        };
+      }
+    }
+    throw err;
+  }
 
   return {
     success: true,

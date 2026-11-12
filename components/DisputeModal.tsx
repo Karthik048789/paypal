@@ -46,30 +46,30 @@ export function DisputeModal({ jobId, onDisputeOpened, onClose }: DisputeModalPr
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl border border-slate-200 max-w-lg w-full p-6 sm:p-8 shadow-2xl relative">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-xl bg-purple-50 border border-purple-200 flex items-center justify-center text-purple-600">
+    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="bento-card bg-[#080b14]/95 backdrop-blur-xl rounded-2xl border border-white/[0.12] max-w-lg w-full p-6 sm:p-8 shadow-2xl relative">
+        <div className="flex items-center gap-3 mb-5 pb-4 border-b border-white/[0.08]">
+          <div className="w-10 h-10 rounded-xl bg-purple-500/15 border border-purple-500/25 flex items-center justify-center text-purple-400">
             <Flag className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-slate-900">Open Escrow Dispute</h3>
-            <p className="text-xs text-slate-500">
+            <h3 className="text-lg font-bold text-white">Open Escrow Dispute</h3>
+            <p className="text-xs text-slate-400">
               Freezes further automated captures. Escalates to PayGuard Admin for review.
             </p>
           </div>
         </div>
 
         {error && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-700 mb-4 flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0" />
+          <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl text-xs text-rose-400 mb-4 flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-rose-400 flex-shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold uppercase text-slate-700 mb-1">
+            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
               Dispute Statement & Evidence Explanation *
             </label>
             <textarea
@@ -78,26 +78,26 @@ export function DisputeModal({ jobId, onDisputeOpened, onClose }: DisputeModalPr
               placeholder="State why you believe the verification outcome was inaccurate or why the deliverable does not match the approved rubric..."
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              className="w-full p-3 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none"
+              className="w-full p-3 text-sm bg-[#05070c] text-white border border-white/[0.1] rounded-xl placeholder-slate-500 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 focus:outline-none"
             />
           </div>
 
-          <div className="p-3 bg-purple-50 border border-purple-200 rounded-lg text-xs text-purple-900 leading-relaxed">
-            <strong>Dispute Policy:</strong> Submitting a dispute places all remaining held funds under arbitration lock. An administrator will review session replays and issue a final resolution (uphold, override, or void).
+          <div className="p-3.5 bg-purple-500/10 border border-purple-500/20 rounded-xl text-xs text-purple-200 leading-relaxed">
+            <strong className="text-white">Dispute Policy:</strong> Submitting a dispute places all remaining held funds under arbitration lock. An administrator will review session replays and issue a final resolution (uphold, override, or void).
           </div>
 
           <div className="flex justify-end gap-3 pt-2">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 border border-slate-300 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
+              className="px-4 py-2 bg-white/[0.05] border border-white/[0.1] rounded-full text-xs font-semibold text-slate-300 hover:text-white hover:bg-white/[0.1] transition-colors duration-150"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="px-5 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-xs font-bold shadow-sm transition inline-flex items-center gap-1.5 disabled:opacity-50"
+              className="px-6 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-full text-xs font-bold shadow-lg shadow-purple-500/25 active:scale-[0.98] transition-all duration-150 inline-flex items-center gap-1.5 disabled:opacity-50"
             >
               {submitting ? (
                 <>

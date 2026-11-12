@@ -2,7 +2,7 @@
 
 import React, { use, useEffect, useState, useCallback, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
-import { Navbar } from '@/components/Navbar';
+import { AppShell } from '@/components/AppShell';
 import { StatusBadge } from '@/components/StatusBadge';
 import { MilestoneStepper } from '@/components/MilestoneStepper';
 import { ChecklistEditor } from '@/components/ChecklistEditor';
@@ -101,21 +101,25 @@ function JobDetailContent({ params }: { params: Promise<{ id: string }> }) {
 
   if (loading && !job) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center text-slate-500 text-sm">
-        <RefreshCw className="w-5 h-5 animate-spin mr-2 text-sky-600" />
-        Loading escrow details...
-      </div>
+      <AppShell>
+        <div className="min-h-[70vh] flex items-center justify-center text-slate-400 text-sm">
+          <RefreshCw className="w-5 h-5 animate-spin mr-2 text-sky-400" />
+          Loading escrow details...
+        </div>
+      </AppShell>
     );
   }
 
   if (!job) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
-        <h2 className="text-xl font-bold text-slate-800">Job Not Found</h2>
-        <a href="/dashboard" className="text-xs text-sky-600 mt-2 font-semibold">
-          Return to Dashboard
-        </a>
-      </div>
+      <AppShell>
+        <div className="min-h-[70vh] flex flex-col items-center justify-center p-4">
+          <h2 className="text-xl font-bold text-white">Job Not Found</h2>
+          <a href="/dashboard" className="text-xs text-sky-400 mt-2 font-semibold hover:underline">
+            Return to Escrow Console
+          </a>
+        </div>
+      </AppShell>
     );
   }
 
@@ -133,58 +137,56 @@ function JobDetailContent({ params }: { params: Promise<{ id: string }> }) {
   const canSubmit = isFreelancer && ['FUNDED', 'PARTIALLY_PAID', 'HELD'].includes(job.status);
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 pb-20">
-      <Navbar />
-
+    <AppShell>
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Top Header Card */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-xs mb-8">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-slate-100">
+        <div className="bento-card bg-[#080b14]/85 backdrop-blur-xl rounded-2xl p-6 sm:p-8 mb-8">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-white/[0.06]">
             <div>
               <div className="flex items-center gap-3 mb-2 flex-wrap">
                 <StatusBadge status={job.status} />
-                <span className="text-xs text-slate-400 font-mono">Job ID: {job.id.slice(0, 8)}...</span>
+                <span className="text-xs text-slate-500 font-mono">Job ID: {job.id.slice(0, 8)}...</span>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
                 {job.title}
               </h1>
-              <p className="text-xs text-slate-500 mt-1 max-w-2xl line-clamp-2">
+              <p className="text-xs text-slate-400 mt-1 max-w-2xl line-clamp-2">
                 {job.requirements}
               </p>
             </div>
 
             <div className="flex flex-col sm:items-end flex-shrink-0">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                Total Escrow Value
+              <span className="text-xs font-medium text-slate-400">
+                Total escrow value
               </span>
-              <span className="text-3xl font-extrabold text-slate-900 font-mono">
+              <span className="text-3xl font-extrabold text-white font-mono tabular-nums">
                 ${(job.amount / 100).toFixed(2)} USD
               </span>
-              <span className="text-[11px] text-slate-400 mt-0.5">
+              <span className="text-[11px] text-slate-500 mt-0.5 font-mono">
                 Target Deadline: {new Date(job.deadline).toLocaleDateString()}
               </span>
             </div>
           </div>
 
           {/* Parties & Metadata Grid */}
-          <div className="pt-6 grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-            <div className="p-3 bg-slate-50 rounded-lg border border-slate-100">
-              <span className="text-slate-400 font-medium block mb-0.5">Client (Depositor)</span>
-              <span className="font-bold text-slate-800">{job.client.name}</span>
-              <span className="text-slate-500 block truncate">{job.client.email}</span>
+          <div className="pt-6 grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs font-mono">
+            <div className="p-3 bg-white/[0.02] rounded-lg border border-white/[0.06]">
+              <span className="text-slate-500 font-sans block mb-0.5">Client (Depositor)</span>
+              <span className="font-bold text-slate-200 font-sans">{job.client.name}</span>
+              <span className="text-slate-400 block truncate">{job.client.email}</span>
             </div>
 
-            <div className="p-3 bg-slate-50 rounded-lg border border-slate-100">
-              <span className="text-slate-400 font-medium block mb-0.5">Freelancer (Payee)</span>
-              <span className="font-bold text-slate-800">
+            <div className="p-3 bg-white/[0.02] rounded-lg border border-white/[0.06]">
+              <span className="text-slate-500 font-sans block mb-0.5">Freelancer (Payee)</span>
+              <span className="font-bold text-slate-200 font-sans">
                 {job.freelancer?.name || 'Invited Freelancer'}
               </span>
-              <span className="text-slate-500 block truncate">{job.freelancerEmail}</span>
+              <span className="text-slate-400 block truncate">{job.freelancerEmail}</span>
             </div>
 
-            <div className="p-3 bg-slate-50 rounded-lg border border-slate-100 flex flex-col justify-center">
-              <span className="text-slate-400 font-medium block mb-1">Current Action Required:</span>
-              <span className="font-bold text-sky-700">
+            <div className="p-3 bg-white/[0.02] rounded-lg border border-white/[0.06] flex flex-col justify-center">
+              <span className="text-slate-500 font-sans block mb-1">Current Action Required:</span>
+              <span className="font-bold text-sky-400 font-sans">
                 {job.status === 'AWAITING_APPROVAL' && 'Both parties must review and approve checklist'}
                 {job.status === 'AWAITING_FUNDING' && 'Client must authorize PayPal escrow hold'}
                 {job.status === 'FUNDED' && 'Freelancer must build deliverable and submit live URL'}
@@ -198,19 +200,19 @@ function JobDetailContent({ params }: { params: Promise<{ id: string }> }) {
           </div>
         </div>
 
-        {/* Milestone Stepper Timeline (FR-31) */}
+        {/* Milestone Stepper Timeline */}
         <div className="mb-8">
           <MilestoneStepper status={job.status} hasSubmission={Boolean(latestSubmission)} />
         </div>
 
-        {/* Navigation Tabs (Section 4.3) */}
-        <div className="flex border-b border-slate-200 mb-8 overflow-x-auto gap-2">
+        {/* Navigation Tabs */}
+        <div className="flex border-b border-white/[0.08] mb-8 overflow-x-auto gap-2">
           <button
             onClick={() => setActiveTab('overview')}
-            className={`pb-3 px-4 text-xs font-bold uppercase tracking-wider flex items-center gap-2 border-b-2 transition ${
+            className={`pb-3 px-4 text-xs font-semibold flex items-center gap-2 border-b-2 transition-colors duration-150 ${
               activeTab === 'overview'
-                ? 'border-sky-600 text-sky-600'
-                : 'border-transparent text-slate-500 hover:text-slate-800'
+                ? 'border-sky-500 text-sky-400'
+                : 'border-transparent text-slate-400 hover:text-white'
             }`}
           >
             <Shield className="w-4 h-4" />
@@ -219,10 +221,10 @@ function JobDetailContent({ params }: { params: Promise<{ id: string }> }) {
 
           <button
             onClick={() => setActiveTab('checklist')}
-            className={`pb-3 px-4 text-xs font-bold uppercase tracking-wider flex items-center gap-2 border-b-2 transition ${
+            className={`pb-3 px-4 text-xs font-semibold flex items-center gap-2 border-b-2 transition-colors duration-150 ${
               activeTab === 'checklist'
-                ? 'border-sky-600 text-sky-600'
-                : 'border-transparent text-slate-500 hover:text-slate-800'
+                ? 'border-sky-500 text-sky-400'
+                : 'border-transparent text-slate-400 hover:text-white'
             }`}
           >
             <FileCheck className="w-4 h-4" />
@@ -232,10 +234,10 @@ function JobDetailContent({ params }: { params: Promise<{ id: string }> }) {
           {canFund && (
             <button
               onClick={() => setActiveTab('fund')}
-              className={`pb-3 px-4 text-xs font-bold uppercase tracking-wider flex items-center gap-2 border-b-2 transition ${
+              className={`pb-3 px-4 text-xs font-semibold flex items-center gap-2 border-b-2 transition-colors duration-150 ${
                 activeTab === 'fund'
-                  ? 'border-sky-600 text-sky-600'
-                  : 'border-transparent text-slate-500 hover:text-slate-800'
+                  ? 'border-sky-500 text-sky-400'
+                  : 'border-transparent text-slate-400 hover:text-white'
               }`}
             >
               <CreditCard className="w-4 h-4" />
@@ -246,10 +248,10 @@ function JobDetailContent({ params }: { params: Promise<{ id: string }> }) {
           {(job.status === 'VERIFYING' || activeRunId) && (
             <button
               onClick={() => setActiveTab('verification')}
-              className={`pb-3 px-4 text-xs font-bold uppercase tracking-wider flex items-center gap-2 border-b-2 transition ${
+              className={`pb-3 px-4 text-xs font-semibold flex items-center gap-2 border-b-2 transition-colors duration-150 ${
                 activeTab === 'verification'
-                  ? 'border-sky-600 text-sky-600'
-                  : 'border-transparent text-slate-500 hover:text-slate-800'
+                  ? 'border-sky-500 text-sky-400'
+                  : 'border-transparent text-slate-400 hover:text-white'
               }`}
             >
               <Eye className="w-4 h-4" />
@@ -260,10 +262,10 @@ function JobDetailContent({ params }: { params: Promise<{ id: string }> }) {
           {latestRun?.reports?.length > 0 && (
             <button
               onClick={() => setActiveTab('report')}
-              className={`pb-3 px-4 text-xs font-bold uppercase tracking-wider flex items-center gap-2 border-b-2 transition ${
+              className={`pb-3 px-4 text-xs font-semibold flex items-center gap-2 border-b-2 transition-colors duration-150 ${
                 activeTab === 'report'
-                  ? 'border-sky-600 text-sky-600'
-                  : 'border-transparent text-slate-500 hover:text-slate-800'
+                  ? 'border-sky-500 text-sky-400'
+                  : 'border-transparent text-slate-400 hover:text-white'
               }`}
             >
               <FileText className="w-4 h-4" />
@@ -275,10 +277,10 @@ function JobDetailContent({ params }: { params: Promise<{ id: string }> }) {
         {/* Tab 1: Overview & Primary Actions */}
         {activeTab === 'overview' && (
           <div className="space-y-8">
-            {/* Contextual Action CTA Box */}
-            <div className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-xs flex flex-col md:flex-row items-center justify-between gap-6">
+            {/* Contextual Action Box */}
+            <div className="bg-[#0e1015] border border-white/[0.08] rounded-2xl p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6">
               <div className="space-y-1">
-                <h3 className="text-lg font-bold text-slate-900">
+                <h3 className="text-lg font-bold text-white">
                   {job.status === 'AWAITING_APPROVAL' && 'Step 1: Review & Lock Checklist'}
                   {job.status === 'AWAITING_FUNDING' && 'Step 2: Deposit Escrow Hold in PayPal'}
                   {job.status === 'FUNDED' && 'Step 3: Deliverable Ready? Submit Live URL'}
@@ -288,7 +290,7 @@ function JobDetailContent({ params }: { params: Promise<{ id: string }> }) {
                   {job.status === 'HELD' && 'Verification Incomplete: Re-test Available'}
                   {job.status === 'DISPUTED' && 'Dispute Arbitration in Progress'}
                 </h3>
-                <p className="text-xs text-slate-500 max-w-xl">
+                <p className="text-xs text-slate-400 max-w-xl">
                   {job.status === 'AWAITING_APPROVAL' && 'Both parties must verify that the 100-point rubric correctly reflects project deliverables before money is locked.'}
                   {job.status === 'AWAITING_FUNDING' && 'Authorize the escrow hold through PayPal sandbox. Funds stay protected until verification completes.'}
                   {job.status === 'FUNDED' && 'The escrow hold is locked. Freelancer can now submit their HTTPS staging or production URL to initiate automated cloud testing.'}
@@ -301,7 +303,7 @@ function JobDetailContent({ params }: { params: Promise<{ id: string }> }) {
                 {job.status === 'AWAITING_APPROVAL' && (
                   <button
                     onClick={() => setActiveTab('checklist')}
-                    className="px-5 py-2.5 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold rounded-lg shadow-sm transition"
+                    className="px-5 py-2.5 bg-sky-500 hover:bg-sky-400 text-slate-950 text-xs font-bold rounded-lg transition-transform duration-100 active:scale-[0.98]"
                   >
                     Go to Checklist Review →
                   </button>
@@ -310,7 +312,7 @@ function JobDetailContent({ params }: { params: Promise<{ id: string }> }) {
                 {canFund && (
                   <button
                     onClick={() => setActiveTab('fund')}
-                    className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-sm transition"
+                    className="px-5 py-2.5 bg-sky-500 hover:bg-sky-400 text-slate-950 text-xs font-bold rounded-lg transition-transform duration-100 active:scale-[0.98]"
                   >
                     Authorize PayPal Hold →
                   </button>
@@ -319,7 +321,7 @@ function JobDetailContent({ params }: { params: Promise<{ id: string }> }) {
                 {canSubmit && (
                   <button
                     onClick={() => setShowSubmitModal(true)}
-                    className="px-5 py-2.5 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold rounded-lg shadow-sm transition inline-flex items-center gap-1.5"
+                    className="px-5 py-2.5 bg-sky-500 hover:bg-sky-400 text-slate-950 text-xs font-bold rounded-lg transition-transform duration-100 active:scale-[0.98] inline-flex items-center gap-1.5"
                   >
                     <Send className="w-3.5 h-3.5" />
                     <span>Submit Live Deliverable URL</span>
@@ -329,7 +331,7 @@ function JobDetailContent({ params }: { params: Promise<{ id: string }> }) {
                 {job.status === 'VERIFYING' && (
                   <button
                     onClick={() => setActiveTab('verification')}
-                    className="px-5 py-2.5 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold rounded-lg shadow-sm transition"
+                    className="px-5 py-2.5 bg-sky-500 hover:bg-sky-400 text-slate-950 text-xs font-bold rounded-lg transition-transform duration-100 active:scale-[0.98]"
                   >
                     Watch Live Cloud Agent →
                   </button>
@@ -338,7 +340,7 @@ function JobDetailContent({ params }: { params: Promise<{ id: string }> }) {
                 {latestRun?.reports?.length > 0 && (
                   <button
                     onClick={() => setActiveTab('report')}
-                    className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-lg shadow-sm transition"
+                    className="px-5 py-2.5 bg-white/[0.08] hover:bg-white/[0.12] text-white text-xs font-bold rounded-lg transition-transform duration-100 active:scale-[0.98]"
                   >
                     View Decision Report →
                   </button>
@@ -350,29 +352,29 @@ function JobDetailContent({ params }: { params: Promise<{ id: string }> }) {
             {latestChecklist && (
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500">
-                    Approved Test Rubric
+                  <h3 className="text-sm font-bold text-white">
+                    Approved acceptance test rubric
                   </h3>
                   <button
                     onClick={() => setActiveTab('checklist')}
-                    className="text-xs font-semibold text-sky-600 hover:underline"
+                    className="text-xs font-semibold text-sky-400 hover:underline"
                   >
                     Full Checklist Editor →
                   </button>
                 </div>
-                <div className="bg-white rounded-xl border border-slate-200 divide-y divide-slate-100">
+                <div className="bg-[#0e1015] rounded-xl border border-white/[0.08] divide-y divide-white/[0.06]">
                   {latestChecklist.items.map((item: any, idx: number) => (
                     <div key={item.id} className="p-4 flex items-center justify-between text-xs">
                       <div className="flex items-center gap-3">
-                        <span className="font-mono text-slate-400 font-bold">#{idx + 1}</span>
+                        <span className="font-mono text-slate-500 font-bold">#{idx + 1}</span>
                         <div>
-                          <span className="font-bold text-slate-800">{item.description}</span>
-                          <span className="text-slate-400 ml-2 font-mono uppercase text-[10px]">
+                          <span className="font-semibold text-slate-200">{item.description}</span>
+                          <span className="text-slate-500 ml-2 font-mono uppercase text-[10px]">
                             [{item.testType}]
                           </span>
                         </div>
                       </div>
-                      <span className="px-2.5 py-1 rounded bg-slate-100 text-slate-700 font-bold font-mono">
+                      <span className="px-2.5 py-1 rounded bg-white/[0.04] text-slate-300 font-bold font-mono">
                         {item.weight} pts
                       </span>
                     </div>
@@ -468,7 +470,7 @@ function JobDetailContent({ params }: { params: Promise<{ id: string }> }) {
           />
         )}
       </main>
-    </div>
+    </AppShell>
   );
 }
 
@@ -476,8 +478,8 @@ export default function JobDetailPage(props: { params: Promise<{ id: string }> }
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-slate-50 flex items-center justify-center text-slate-500 text-sm">
-          <RefreshCw className="w-5 h-5 animate-spin mr-2 text-sky-600" />
+        <div className="min-h-screen bg-[#05070c] flex items-center justify-center text-slate-400 text-sm">
+          <RefreshCw className="w-5 h-5 animate-spin mr-2 text-sky-400" />
           Loading escrow contract...
         </div>
       }

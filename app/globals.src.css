@@ -1,35 +1,182 @@
 @import "tailwindcss";
 
-:root {
-  --primary: #090d16;
-  --primary-foreground: #ffffff;
-  --accent: #0284c7;
-  --accent-foreground: #ffffff;
-  --background: #f8fafc;
-  --foreground: #090d16;
-  --card: #ffffff;
-  --card-foreground: #090d16;
-  --muted: #f1f5f9;
-  --muted-foreground: #64748b;
-  --border: #e2e8f0;
-  --ring: #0284c7;
-  --radius: 0.75rem;
+/* ==========================================================================
+   MotionSites AI & Chroma-Craft 2.0 Unified Design System
+   ========================================================================== */
 
-  /* Status Colors from PRD */
-  --status-not-funded: #94a3b8;
-  --status-held: #2563eb;
-  --status-paid: #16a34a;
-  --status-partial: #d97706;
-  --status-fail: #dc2626;
+:root {
+  /* Surface & Canvas Tokens */
+  --color-canvas: #06080d;
+  --color-surface: #0b0f19;
+  --color-surface-elevated: #111726;
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-border-hover: rgba(255, 255, 255, 0.16);
+
+  /* Brand Accents */
+  --color-brand-primary: #0284c7;
+  --color-brand-accent: #38bdf8;
+  --color-interactive-focus: #38bdf8;
+
+  /* Typography & Text */
+  --color-text-primary: #f8fafc;
+  --color-text-secondary: #94a3b8;
+  --color-text-tertiary: #64748b;
+
+  /* Financial Status */
+  --color-status-paid: #10b981;
+  --color-status-partial: #f59e0b;
+  --color-status-held: #3b82f6;
+  --color-status-fail: #ef4444;
+
+  /* Typography */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
+html,
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  overflow-x: clip;
+  max-width: 100%;
+  font-family: var(--font-sans);
+  background-color: var(--color-canvas);
+  color: var(--color-text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom scrollbars for logs and code blocks */
+/* Accessible focus visible */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--color-interactive-focus);
+  outline-offset: 2px;
+}
+
+/* Reduced motion respect */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* MotionSites Shimmer Animation */
+@keyframes shimmer-sweep {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}
+
+.shimmer-active {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer-active::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.15),
+    transparent
+  );
+  animation: shimmer-sweep 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Bento Card with Specular Top Highlight */
+.bento-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.04), 0 20px 40px -15px rgba(0, 0, 0, 0.7);
+  transition: border-color 200ms ease-out, transform 200ms ease-out, box-shadow 200ms ease-out;
+}
+
+.bento-card:hover {
+  border-color: var(--color-border-hover);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 30px -10px rgba(56, 189, 248, 0.1);
+}
+
+/* Hero Ambient Radial Glow */
+.hero-glow {
+  background: radial-gradient(circle at 50% 10%, rgba(2, 132, 199, 0.18) 0%, rgba(14, 165, 233, 0.05) 40%, transparent 70%);
+}
+
+/* UI IDEA Video Signature Styles: Geometric Grid Mesh & Dual Neon Ambient Glows */
+.bg-grid-mesh {
+  background-size: 40px 40px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+}
+
+.neon-glow-left {
+  background: radial-gradient(circle at bottom left, rgba(59, 130, 246, 0.45) 0%, rgba(99, 102, 241, 0.3) 30%, rgba(147, 51, 234, 0.15) 50%, transparent 75%);
+}
+
+.neon-glow-right {
+  background: radial-gradient(circle at bottom right, rgba(236, 72, 153, 0.45) 0%, rgba(217, 70, 239, 0.3) 30%, rgba(168, 85, 247, 0.15) 50%, transparent 75%);
+}
+
+/* 3-Node Interactive Pipeline Signal Pulse */
+@keyframes signalPulse {
+  0% {
+    left: -10%;
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    left: 110%;
+    opacity: 0;
+  }
+}
+
+.animate-signal {
+  animation: signalPulse 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.node-active-ring {
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.6), 0 0 30px rgba(56, 189, 248, 0.35);
+}
+
+.node-active-ring-pink {
+  box-shadow: 0 0 0 2px rgba(236, 72, 153, 0.6), 0 0 30px rgba(236, 72, 153, 0.35);
+}
+
+/* Tactile Button Press */
+.tactile-btn {
+  transition: transform 120ms ease-out, background-color 150ms ease-out, border-color 150ms ease-out;
+}
+.tactile-btn:active {
+  transform: scale(0.98);
+}
+
+/* Terminal Log Viewers */
+.terminal-container {
+  background-color: #04060a;
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+  font-family: var(--font-mono);
+}
+
+/* Custom Scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -38,41 +185,9 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #1e293b;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
-
-@keyframes pulse-subtle {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
-}
-
-.animate-pulse-subtle {
-  animation: pulse-subtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-/* Professional Fintech Card and Surface Styles */
-.card-elevated {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 0.875rem;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
-}
-
-.card-elevated-dark {
-  background: #0d1322;
-  border: 1px solid #1e293b;
-  border-radius: 0.875rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -2px rgba(0, 0, 0, 0.2);
-}
-
-/* Terminal Log Viewers */
-.terminal-container {
-  background: #070b14;
-  border: 1px solid #1e293b;
-  border-radius: 0.75rem;
-  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  background: #334155;
 }

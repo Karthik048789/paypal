@@ -10,35 +10,35 @@ interface MilestoneStepperProps {
 }
 
 export function MilestoneStepper({ status, hasSubmission = false }: MilestoneStepperProps) {
-  // Steps: 1. Created, 2. Funded, 3. Submitted, 4. Verified, 5. Settled
   const isCreatedComplete = status !== 'DRAFT';
   const isFundedComplete = !['DRAFT', 'AWAITING_APPROVAL', 'AWAITING_FUNDING'].includes(status);
-  const isSubmittedComplete = isFundedComplete && (hasSubmission || ['VERIFYING', 'PAID', 'PARTIALLY_PAID', 'HELD', 'DISPUTED'].includes(status));
+  const isSubmittedComplete =
+    isFundedComplete &&
+    (hasSubmission || ['VERIFYING', 'PAID', 'PARTIALLY_PAID', 'HELD', 'DISPUTED'].includes(status));
   const isVerifiedComplete = ['PAID', 'PARTIALLY_PAID', 'HELD'].includes(status);
 
-  // Settlement specific styling
-  let settledColor = 'border-slate-300 text-slate-400 bg-white';
+  let settledColor = 'border-white/[0.15] text-slate-400 bg-[#0b0f19]';
   let settledLabel = 'Settled';
   let settledSublabel = 'Awaiting verification';
   let settledIcon = <CircleDot className="w-4 h-4" />;
 
   if (status === 'PAID') {
-    settledColor = 'border-emerald-600 bg-emerald-600 text-white shadow-emerald-100 shadow-md';
+    settledColor = 'border-emerald-400 bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/25';
     settledLabel = 'Paid in Full';
     settledSublabel = '100% captured';
     settledIcon = <Check className="w-4 h-4" />;
   } else if (status === 'PARTIALLY_PAID') {
-    settledColor = 'border-amber-600 bg-amber-600 text-white shadow-amber-100 shadow-md';
+    settledColor = 'border-amber-400 bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/25';
     settledLabel = 'Partially Paid';
     settledSublabel = '70% captured, 30% held';
     settledIcon = <ShieldCheck className="w-4 h-4" />;
   } else if (status === 'HELD') {
-    settledColor = 'border-rose-600 bg-rose-600 text-white shadow-rose-100 shadow-md';
+    settledColor = 'border-rose-400 bg-rose-500 text-white shadow-lg shadow-rose-500/25';
     settledLabel = 'Funds Held';
     settledSublabel = '0% captured, fixes needed';
     settledIcon = <ShieldAlert className="w-4 h-4" />;
   } else if (status === 'DISPUTED') {
-    settledColor = 'border-purple-600 bg-purple-600 text-white shadow-purple-100 shadow-md';
+    settledColor = 'border-purple-400 bg-purple-600 text-white shadow-lg shadow-purple-500/25';
     settledLabel = 'Disputed';
     settledSublabel = 'Under Admin review';
     settledIcon = <ShieldAlert className="w-4 h-4" />;
@@ -52,7 +52,9 @@ export function MilestoneStepper({ status, hasSubmission = false }: MilestoneSte
       isCompleted: isCreatedComplete,
       isActive: status === 'DRAFT' || status === 'AWAITING_APPROVAL',
       icon: isCreatedComplete ? <Check className="w-4 h-4" /> : <Clock className="w-4 h-4" />,
-      colorClass: isCreatedComplete ? 'bg-slate-800 text-white border-slate-800' : 'bg-white border-slate-300 text-slate-500',
+      colorClass: isCreatedComplete
+        ? 'bg-white text-slate-950 border-white shadow-md shadow-white/10'
+        : 'bg-[#0b0f19] border-white/[0.15] text-slate-400',
     },
     {
       id: 'funded',
@@ -61,7 +63,9 @@ export function MilestoneStepper({ status, hasSubmission = false }: MilestoneSte
       isCompleted: isFundedComplete,
       isActive: status === 'AWAITING_FUNDING',
       icon: isFundedComplete ? <Check className="w-4 h-4" /> : <Clock className="w-4 h-4" />,
-      colorClass: isFundedComplete ? 'bg-blue-600 text-white border-blue-600 shadow-blue-100 shadow-md' : 'bg-white border-slate-300 text-slate-400',
+      colorClass: isFundedComplete
+        ? 'bg-sky-500 text-slate-950 border-sky-400 shadow-lg shadow-sky-500/25'
+        : 'bg-[#0b0f19] border-white/[0.15] text-slate-400',
     },
     {
       id: 'submitted',
@@ -70,7 +74,9 @@ export function MilestoneStepper({ status, hasSubmission = false }: MilestoneSte
       isCompleted: isSubmittedComplete,
       isActive: status === 'FUNDED' && !hasSubmission,
       icon: isSubmittedComplete ? <Check className="w-4 h-4" /> : <FileCheck className="w-4 h-4" />,
-      colorClass: isSubmittedComplete ? 'bg-blue-600 text-white border-blue-600' : 'bg-white border-slate-300 text-slate-400',
+      colorClass: isSubmittedComplete
+        ? 'bg-sky-500 text-slate-950 border-sky-400 shadow-lg shadow-sky-500/25'
+        : 'bg-[#0b0f19] border-white/[0.15] text-slate-400',
     },
     {
       id: 'verifying',
@@ -80,10 +86,10 @@ export function MilestoneStepper({ status, hasSubmission = false }: MilestoneSte
       isActive: status === 'VERIFYING',
       icon: isVerifiedComplete ? <Check className="w-4 h-4" /> : <CircleDot className="w-4 h-4" />,
       colorClass: isVerifiedComplete
-        ? 'bg-blue-600 text-white border-blue-600'
+        ? 'bg-sky-500 text-slate-950 border-sky-400 shadow-lg shadow-sky-500/25'
         : status === 'VERIFYING'
-        ? 'bg-sky-500 text-white border-sky-500 animate-pulse'
-        : 'bg-white border-slate-300 text-slate-400',
+        ? 'bg-white text-slate-950 border-white animate-pulse shadow-lg shadow-white/30'
+        : 'bg-[#0b0f19] border-white/[0.15] text-slate-400',
     },
     {
       id: 'settled',
@@ -97,12 +103,12 @@ export function MilestoneStepper({ status, hasSubmission = false }: MilestoneSte
   ];
 
   return (
-    <div className="w-full bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+    <div className="w-full bento-card bg-[#080b14]/85 backdrop-blur-xl rounded-2xl p-6">
       <div className="flex items-center justify-between relative">
         {/* Connecting Line */}
-        <div className="absolute top-1/2 left-6 right-6 -translate-y-1/2 h-1 bg-slate-200 -z-0 transition-all duration-300">
+        <div className="absolute top-4.5 left-8 right-8 h-[2px] bg-white/[0.08] z-0">
           <div
-            className="h-full bg-blue-600 transition-all duration-500 ease-in-out"
+            className="h-full bg-gradient-to-r from-sky-400 via-white to-pink-400 transition-all duration-500 ease-in-out"
             style={{
               width: isVerifiedComplete
                 ? '100%'
@@ -117,7 +123,7 @@ export function MilestoneStepper({ status, hasSubmission = false }: MilestoneSte
           />
         </div>
 
-        {steps.map((step, idx) => (
+        {steps.map((step) => (
           <div key={step.id} className="relative z-10 flex flex-col items-center text-center">
             <div
               className={`w-9 h-9 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${step.colorClass}`}
@@ -125,10 +131,14 @@ export function MilestoneStepper({ status, hasSubmission = false }: MilestoneSte
               {step.icon}
             </div>
             <div className="mt-2.5">
-              <span className={`text-xs font-semibold block ${step.isActive ? 'text-slate-900 font-bold' : 'text-slate-600'}`}>
+              <span
+                className={`text-xs font-semibold block ${
+                  step.isActive || step.isCompleted ? 'text-white' : 'text-slate-400'
+                }`}
+              >
                 {step.label}
               </span>
-              <span className="text-[11px] text-slate-400 hidden sm:block mt-0.5">
+              <span className="text-[11px] text-slate-500 hidden sm:block mt-0.5">
                 {step.sublabel}
               </span>
             </div>
@@ -138,4 +148,3 @@ export function MilestoneStepper({ status, hasSubmission = false }: MilestoneSte
     </div>
   );
 }
-

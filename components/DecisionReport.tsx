@@ -57,24 +57,24 @@ export function DecisionReport({ job, run, onRetest, onOpenDispute }: DecisionRe
   };
 
   // Payout banner styling
-  let bannerColor = 'bg-rose-50 border-rose-200 text-rose-900';
-  let bannerIcon = <AlertTriangle className="w-5 h-5 text-rose-600" />;
+  let bannerColor = 'bg-rose-500/10 border-rose-500/25 text-rose-300';
+  let bannerIcon = <AlertTriangle className="w-5 h-5 text-rose-400" />;
   let payoutStatement = `$0 released, $${heldDollars.toFixed(2)} held until fixes pass.`;
 
   if (payoutPercent === 100) {
-    bannerColor = 'bg-emerald-50 border-emerald-200 text-emerald-900';
-    bannerIcon = <ShieldCheck className="w-5 h-5 text-emerald-600" />;
+    bannerColor = 'bg-emerald-500/10 border-emerald-500/25 text-emerald-300';
+    bannerIcon = <ShieldCheck className="w-5 h-5 text-emerald-400" />;
     payoutStatement = `Full $${releasedDollars.toFixed(2)} USD (100%) captured and released to freelancer.`;
   } else if (payoutPercent === 70) {
-    bannerColor = 'bg-amber-50 border-amber-200 text-amber-900';
-    bannerIcon = <AlertTriangle className="w-5 h-5 text-amber-600" />;
+    bannerColor = 'bg-amber-500/10 border-amber-500/25 text-amber-300';
+    bannerIcon = <AlertTriangle className="w-5 h-5 text-amber-400" />;
     payoutStatement = `$${releasedDollars.toFixed(2)} USD (70%) released, $${heldDollars.toFixed(2)} held until fixes pass.`;
   }
 
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm print:border-none print:shadow-none">
+    <div className="bento-card bg-[#080b14]/90 backdrop-blur-xl rounded-2xl overflow-hidden shadow-2xl print:border-none print:shadow-none">
       {/* Top Banner: Score Reveal & Payout Statement */}
-      <div className="p-6 sm:p-8 border-b border-slate-200 bg-gradient-to-b from-slate-50 to-white">
+      <div className="p-6 sm:p-8 border-b border-white/[0.08] bg-white/[0.02]">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           {/* Score Ring / Display */}
           <div className="flex items-center gap-6">
@@ -84,7 +84,7 @@ export function DecisionReport({ job, run, onRetest, onOpenDispute }: DecisionRe
                   cx="56"
                   cy="56"
                   r="48"
-                  stroke="#E2E8F0"
+                  stroke="rgba(255,255,255,0.08)"
                   strokeWidth="8"
                   fill="transparent"
                 />
@@ -92,7 +92,7 @@ export function DecisionReport({ job, run, onRetest, onOpenDispute }: DecisionRe
                   cx="56"
                   cy="56"
                   r="48"
-                  stroke={payoutPercent === 100 ? '#16A34A' : payoutPercent === 70 ? '#D97706' : '#DC2626'}
+                  stroke={payoutPercent === 100 ? '#10B981' : payoutPercent === 70 ? '#F59E0B' : '#F43F5E'}
                   strokeWidth="8"
                   fill="transparent"
                   strokeDasharray={301.59}
@@ -102,19 +102,19 @@ export function DecisionReport({ job, run, onRetest, onOpenDispute }: DecisionRe
                 />
               </svg>
               <div className="absolute flex flex-col items-center">
-                <span className="text-3xl font-extrabold text-slate-900">{score}</span>
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">/ 100</span>
+                <span className="text-3xl font-extrabold text-white font-mono">{score}</span>
+                <span className="text-[10px] font-bold text-slate-400 font-mono">/ 100</span>
               </div>
             </div>
 
             <div>
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200 mb-1">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-white/[0.05] text-sky-400 border border-white/[0.1] mb-1.5">
                 Deterministic Outcome
               </div>
-              <h2 className="text-2xl font-bold text-slate-900">
+              <h2 className="text-2xl font-bold text-white">
                 {payoutPercent === 100 ? 'Verified & Paid' : payoutPercent === 70 ? 'Partially Verified' : 'Held (Fixes Required)'}
               </h2>
-              <p className="text-xs text-slate-500 max-w-md mt-0.5">
+              <p className="text-xs text-slate-400 max-w-md mt-1">
                 {report?.reasoning || 'Automated score computed from pure deterministic weights without LLM intervention.'}
               </p>
             </div>
@@ -124,9 +124,9 @@ export function DecisionReport({ job, run, onRetest, onOpenDispute }: DecisionRe
           <div className="flex gap-2 print:hidden">
             <button
               onClick={handlePrint}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 shadow-xs transition"
+              className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-white/[0.05] border border-white/[0.1] rounded-full hover:bg-white/[0.1] transition-colors duration-150"
             >
-              <Download className="w-4 h-4 text-slate-500" />
+              <Download className="w-4 h-4 text-slate-400" />
               Download Report PDF
             </button>
           </div>
@@ -143,7 +143,7 @@ export function DecisionReport({ job, run, onRetest, onOpenDispute }: DecisionRe
 
       {/* Item-by-Item Breakdown Cards (FR-27) */}
       <div className="p-6 sm:p-8 space-y-4">
-        <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400 mb-2">
+        <h3 className="text-xs font-semibold text-slate-400 mb-2">
           Item-By-Item Verification Evidence ({run.testResults.length} Tests)
         </h3>
 
@@ -155,41 +155,43 @@ export function DecisionReport({ job, run, onRetest, onOpenDispute }: DecisionRe
             <div
               key={result.id}
               className={`border rounded-xl overflow-hidden transition-all duration-200 ${
-                isPass ? 'border-slate-200' : 'border-rose-200 bg-rose-50/20'
+                isPass ? 'border-white/[0.08] bg-white/[0.02]' : 'border-rose-500/30 bg-rose-500/5'
               }`}
             >
               {/* Header Toggle */}
               <button
                 onClick={() => toggleExpand(result.id)}
-                className="w-full p-4 sm:p-5 flex items-center justify-between text-left hover:bg-slate-50/70 transition"
+                className="w-full p-4 sm:p-5 flex items-center justify-between text-left hover:bg-white/[0.03] transition-colors duration-150"
                 aria-expanded={isExpanded}
               >
                 <div className="flex items-center gap-3">
                   {isPass ? (
-                    <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+                    <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0" />
                   ) : (
-                    <XCircle className="w-5 h-5 text-rose-600 flex-shrink-0" />
+                    <XCircle className="w-5 h-5 text-rose-400 flex-shrink-0" />
                   )}
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-bold text-sm text-slate-900">{result.item.description}</span>
-                      <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded bg-slate-100 text-slate-600">
+                      <span className="font-bold text-sm text-white">{result.item.description}</span>
+                      <span className="text-[10px] font-mono font-medium px-2 py-0.5 rounded-md bg-white/[0.05] text-sky-400 border border-white/[0.08]">
                         {result.item.testType}
                       </span>
                       {result.item.critical && (
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-rose-100 text-rose-700">
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-rose-500/15 text-rose-400 border border-rose-500/25">
                           Critical
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-slate-500 mt-1">{result.explanation}</p>
+                    <p className="text-xs text-slate-400 mt-1">{result.explanation}</p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-4">
                   <span
                     className={`font-mono text-xs font-bold px-2.5 py-1 rounded-md ${
-                      isPass ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'
+                      isPass
+                        ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                        : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
                     }`}
                   >
                     {isPass ? `+${result.item.weight} pts` : `0 / ${result.item.weight} pts`}
@@ -200,22 +202,22 @@ export function DecisionReport({ job, run, onRetest, onOpenDispute }: DecisionRe
 
               {/* Collapsible Evidence Body */}
               {isExpanded && (
-                <div className="p-5 border-t border-slate-100 bg-slate-50 space-y-4">
+                <div className="p-5 border-t border-white/[0.06] bg-[#05070c]/80 space-y-4">
                   <div>
-                    <h5 className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+                    <h5 className="text-xs font-semibold text-slate-400 mb-1.5">
                       Target Assertion Criteria
                     </h5>
-                    <p className="text-xs text-slate-700 bg-white p-2.5 rounded border border-slate-200">
+                    <p className="text-xs text-slate-300 bg-white/[0.03] p-3 rounded-lg border border-white/[0.06]">
                       {result.item.criteria}
                     </p>
                   </div>
 
                   {result.logExcerpt && (
                     <div>
-                      <h5 className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+                      <h5 className="text-xs font-semibold text-slate-400 mb-1.5">
                         Execution Terminal Log Excerpt
                       </h5>
-                      <pre className="text-[11px] font-mono p-3 bg-slate-900 text-slate-200 rounded-lg overflow-x-auto">
+                      <pre className="text-[11px] font-mono p-3.5 bg-[#030508] border border-white/[0.08] text-slate-300 rounded-xl overflow-x-auto">
                         {result.logExcerpt}
                       </pre>
                     </div>
@@ -223,14 +225,14 @@ export function DecisionReport({ job, run, onRetest, onOpenDispute }: DecisionRe
 
                   {/* Evidence Screenshot Lightbox */}
                   <div>
-                    <h5 className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+                    <h5 className="text-xs font-semibold text-slate-400 mb-1.5">
                       Visual Evidence Capture (Cloud Browser Viewport)
                     </h5>
-                    <div className="p-4 bg-white border border-slate-200 rounded-lg flex flex-col items-center justify-center text-slate-400 text-xs">
-                      <div className="w-full h-32 bg-slate-100 rounded flex items-center justify-center border border-dashed border-slate-300">
+                    <div className="p-4 bg-white/[0.02] border border-white/[0.08] rounded-xl flex flex-col items-center justify-center text-slate-400 text-xs">
+                      <div className="w-full h-32 bg-[#05070c] rounded-lg flex items-center justify-center border border-dashed border-white/[0.12]">
                         <span>📸 Visual Screenshot Snapshot ({result.item.testType})</span>
                       </div>
-                      <span className="text-[10px] text-slate-400 mt-2 font-mono">
+                      <span className="text-[10px] text-slate-500 mt-2 font-mono">
                         Evidence Hash: sha256:{result.id.slice(0, 16)}...
                       </span>
                     </div>
@@ -243,8 +245,8 @@ export function DecisionReport({ job, run, onRetest, onOpenDispute }: DecisionRe
       </div>
 
       {/* Decision Footer Actions (FR-29, FR-33) */}
-      <div className="p-6 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-between gap-4 print:hidden">
-        <div className="text-xs text-slate-500">
+      <div className="p-6 bg-white/[0.02] border-t border-white/[0.08] flex flex-wrap items-center justify-between gap-4 print:hidden">
+        <div className="text-xs text-slate-400">
           Both parties are protected by PayGuard Escrow dispute and re-test protocols.
         </div>
 
@@ -252,7 +254,7 @@ export function DecisionReport({ job, run, onRetest, onOpenDispute }: DecisionRe
           {job.status === 'PARTIALLY_PAID' || job.status === 'HELD' ? (
             <button
               onClick={onRetest}
-              className="inline-flex items-center gap-1.5 px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold rounded-lg shadow-sm transition"
+              className="inline-flex items-center gap-1.5 px-5 py-2 bg-white hover:bg-slate-200 text-slate-950 text-xs font-bold rounded-full shadow-lg shadow-white/10 active:scale-[0.98] transition-transform duration-150"
             >
               <RotateCw className="w-3.5 h-3.5" />
               Request Re-Test (Max 3)
@@ -262,9 +264,9 @@ export function DecisionReport({ job, run, onRetest, onOpenDispute }: DecisionRe
           {job.status !== 'DISPUTED' && (
             <button
               onClick={onOpenDispute}
-              className="inline-flex items-center gap-1.5 px-4 py-2 bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 text-xs font-semibold rounded-lg transition"
+              className="inline-flex items-center gap-1.5 px-4 py-2 bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.1] text-white text-xs font-semibold rounded-full transition-colors duration-150"
             >
-              <Flag className="w-3.5 h-3.5 text-rose-500" />
+              <Flag className="w-3.5 h-3.5 text-rose-400" />
               Open Escrow Dispute
             </button>
           )}

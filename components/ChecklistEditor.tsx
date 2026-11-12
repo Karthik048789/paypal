@@ -126,26 +126,26 @@ export function ChecklistEditor({
   };
 
   return (
-    <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+    <div className="bento-card bg-[#080b14]/85 backdrop-blur-xl rounded-2xl overflow-hidden">
       {/* Header */}
-      <div className="p-6 border-b border-slate-200 flex flex-wrap items-center justify-between gap-4 bg-slate-50/50">
+      <div className="p-6 border-b border-white/[0.08] flex flex-wrap items-center justify-between gap-4 bg-white/[0.02]">
         <div>
           <div className="flex items-center gap-2">
-            <h3 className="text-base font-bold text-slate-900">
+            <h3 className="text-base font-bold text-white">
               AI Verification Checklist (v{checklist.version})
             </h3>
             {checklist.isLocked ? (
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                <Lock className="w-3 h-3 text-emerald-600" />
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                <Lock className="w-3 h-3 text-emerald-400" />
                 Locked & Immutable
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-400 border border-amber-500/30">
                 Awaiting Dual Approval
               </span>
             )}
           </div>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-slate-400 mt-1">
             Deterministic test rubric generated from client specifications. Both parties must approve to lock.
           </p>
         </div>
@@ -155,9 +155,9 @@ export function ChecklistEditor({
           {canEdit && !isEditing && (
             <button
               onClick={() => setIsEditing(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium text-slate-200 bg-white/[0.05] border border-white/[0.1] rounded-full hover:bg-white/[0.1] transition-colors duration-150"
             >
-              <Edit3 className="w-3.5 h-3.5 text-slate-500" />
+              <Edit3 className="w-3.5 h-3.5 text-slate-400" />
               Edit Criteria / Weights
             </button>
           )}
@@ -167,7 +167,7 @@ export function ChecklistEditor({
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-white bg-sky-600 rounded-lg hover:bg-sky-700 transition"
+                className="inline-flex items-center gap-1.5 px-4 py-1.5 text-xs font-bold text-slate-950 bg-white rounded-full hover:bg-slate-200 transition-colors duration-150"
               >
                 <Save className="w-3.5 h-3.5" />
                 {saving ? 'Saving...' : 'Save Changes'}
@@ -177,7 +177,7 @@ export function ChecklistEditor({
                   setIsEditing(false);
                   setError('');
                 }}
-                className="px-3 py-1.5 text-xs font-medium text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition"
+                className="px-3.5 py-1.5 text-xs font-medium text-slate-300 bg-white/[0.04] border border-white/[0.1] rounded-full hover:bg-white/[0.08] transition-colors duration-150"
               >
                 Cancel
               </button>
@@ -187,25 +187,25 @@ export function ChecklistEditor({
       </div>
 
       {error && (
-        <div className="mx-6 mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-700 flex items-center gap-2">
-          <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0" />
+        <div className="mx-6 mt-4 p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl text-xs text-rose-400 flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 text-rose-400 flex-shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
       {/* Checklist Items Table */}
-      <div className="divide-y divide-slate-100">
+      <div className="divide-y divide-white/[0.06]">
         {items.map((item, idx) => (
-          <div key={idx} className="p-4 sm:p-5 hover:bg-slate-50/50 transition">
+          <div key={idx} className="p-4 sm:p-5 hover:bg-white/[0.02] transition-colors duration-150">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                  <span className="font-mono text-xs font-bold text-slate-400">#{idx + 1}</span>
-                  <span className="px-2 py-0.5 rounded text-[11px] font-semibold uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200">
+                  <span className="font-mono text-xs font-bold text-slate-500">#{idx + 1}</span>
+                  <span className="px-2 py-0.5 rounded-md text-[11px] font-mono font-medium bg-white/[0.05] text-sky-400 border border-white/[0.08]">
                     {item.testType}
                   </span>
                   {item.critical && (
-                    <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+                    <span className="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-rose-500/15 text-rose-400 border border-rose-500/25">
                       Hard-Fail Critical (BR-5)
                     </span>
                   )}
@@ -217,26 +217,26 @@ export function ChecklistEditor({
                       type="text"
                       value={item.description}
                       onChange={(e) => handleDescChange(idx, e.target.value)}
-                      className="w-full px-2.5 py-1.5 text-sm font-semibold border border-slate-300 rounded focus:ring-1 focus:ring-sky-500"
+                      className="w-full px-3 py-1.5 text-sm font-semibold bg-[#05070c] text-white border border-white/[0.12] rounded-lg focus:outline-none focus:border-sky-500"
                     />
                     <textarea
                       value={item.criteria}
                       onChange={(e) => handleCriteriaChange(idx, e.target.value)}
                       rows={2}
-                      className="w-full px-2.5 py-1.5 text-xs text-slate-600 border border-slate-300 rounded focus:ring-1 focus:ring-sky-500"
+                      className="w-full px-3 py-1.5 text-xs bg-[#05070c] text-slate-300 border border-white/[0.12] rounded-lg focus:outline-none focus:border-sky-500"
                     />
                   </div>
                 ) : (
                   <>
-                    <h4 className="text-sm font-semibold text-slate-900">{item.description}</h4>
-                    <p className="text-xs text-slate-500 mt-0.5">{item.criteria}</p>
+                    <h4 className="text-sm font-semibold text-white">{item.description}</h4>
+                    <p className="text-xs text-slate-400 mt-0.5">{item.criteria}</p>
                   </>
                 )}
               </div>
 
               {/* Weight Pill / Input */}
               <div className="flex items-center gap-3 sm:flex-col sm:items-end">
-                <span className="text-[11px] text-slate-400 font-medium">Test Weight</span>
+                <span className="text-[11px] text-slate-500 font-medium">Test Weight</span>
                 {isEditing ? (
                   <div className="flex items-center gap-1">
                     <input
@@ -245,12 +245,12 @@ export function ChecklistEditor({
                       max={60}
                       value={item.weight}
                       onChange={(e) => handleWeightChange(idx, Number(e.target.value))}
-                      className="w-16 px-2 py-1 text-center font-bold text-sm border border-slate-300 rounded focus:ring-1 focus:ring-sky-500"
+                      className="w-16 px-2 py-1 text-center font-bold font-mono text-sm bg-[#05070c] text-white border border-white/[0.12] rounded-lg focus:outline-none focus:border-sky-500"
                     />
-                    <span className="text-xs font-semibold text-slate-500">pts</span>
+                    <span className="text-xs font-semibold text-slate-400">pts</span>
                   </div>
                 ) : (
-                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-sky-50 text-sky-700 border border-sky-200">
+                  <span className="px-3 py-1 rounded-full text-xs font-bold font-mono bg-sky-500/10 text-sky-400 border border-sky-500/20">
                     {item.weight} pts
                   </span>
                 )}
@@ -261,18 +261,18 @@ export function ChecklistEditor({
       </div>
 
       {/* Footer / Dual Approval Status */}
-      <div className="p-6 bg-slate-50 border-t border-slate-200">
+      <div className="p-6 bg-white/[0.02] border-t border-white/[0.08]">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           {/* Weight Totals Validation */}
           <div className="flex items-center gap-3">
             <div className="text-xs">
-              <span className="text-slate-500">Total Rubric Weight: </span>
-              <strong className={isSumValid ? 'text-emerald-700 font-bold' : 'text-rose-600 font-bold'}>
+              <span className="text-slate-400">Total Rubric Weight: </span>
+              <strong className={isSumValid ? 'text-emerald-400 font-bold font-mono' : 'text-rose-400 font-bold font-mono'}>
                 {totalWeight} / 100 pts
               </strong>
             </div>
             {!isSumValid && (
-              <span className="text-[11px] text-rose-600 font-medium">
+              <span className="text-[11px] text-rose-400 font-medium">
                 (Must equal 100 before approval)
               </span>
             )}
@@ -281,26 +281,26 @@ export function ChecklistEditor({
           {/* Dual Approval Controls */}
           <div className="flex items-center gap-4 flex-wrap">
             <div className="flex items-center gap-2 text-xs">
-              <span className="text-slate-500">Client:</span>
+              <span className="text-slate-400">Client:</span>
               {checklist.approvedByClientAt ? (
-                <span className="inline-flex items-center gap-1 text-emerald-700 font-semibold">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                <span className="inline-flex items-center gap-1 text-emerald-400 font-semibold">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
                   Approved
                 </span>
               ) : (
-                <span className="text-slate-400">Pending</span>
+                <span className="text-slate-500">Pending</span>
               )}
             </div>
 
             <div className="flex items-center gap-2 text-xs">
-              <span className="text-slate-500">Freelancer:</span>
+              <span className="text-slate-400">Freelancer:</span>
               {checklist.approvedByFreelancerAt ? (
-                <span className="inline-flex items-center gap-1 text-emerald-700 font-semibold">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                <span className="inline-flex items-center gap-1 text-emerald-400 font-semibold">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
                   Approved
                 </span>
               ) : (
-                <span className="text-slate-400">Pending</span>
+                <span className="text-slate-500">Pending</span>
               )}
             </div>
 
@@ -308,7 +308,7 @@ export function ChecklistEditor({
               <button
                 onClick={handleApprove}
                 disabled={approving || !isSumValid || !hasConsoleHealth}
-                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 text-white text-xs font-bold rounded-lg shadow-sm transition inline-flex items-center gap-1.5"
+                className="px-5 py-2 bg-white hover:bg-slate-200 disabled:bg-white/10 disabled:text-slate-500 text-slate-950 text-xs font-bold rounded-full shadow-lg shadow-white/10 active:scale-[0.98] transition-transform duration-150 inline-flex items-center gap-1.5"
               >
                 <Check className="w-3.5 h-3.5" />
                 {approving ? 'Approving...' : isClient ? 'Approve as Client' : 'Approve as Freelancer'}

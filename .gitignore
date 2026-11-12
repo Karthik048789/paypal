@@ -23,6 +23,8 @@ dist/
 .DS_Store
 Thumbs.db
 *.pem
+*.mp4
+UI IDEA.mp4
 
 # debug & logs
 *.log

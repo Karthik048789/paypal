@@ -125,11 +125,11 @@ export function LiveVerificationView({
   };
 
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-lg">
+    <div className="bento-card bg-[#080b14]/90 backdrop-blur-xl rounded-2xl overflow-hidden shadow-2xl">
       {/* Top Bar with Live Pill, Stopwatch, Step Counter */}
-      <div className="bg-slate-900 text-white px-6 py-4 flex flex-wrap items-center justify-between gap-4">
+      <div className="bg-[#05070c] text-white px-6 py-4 flex flex-wrap items-center justify-between gap-4 border-b border-white/[0.08]">
         <div className="flex items-center gap-3">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-rose-500/20 text-rose-400 border border-rose-500/30">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-500/15 text-rose-400 border border-rose-500/30">
             <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
             Live Cloud Verification
           </span>
@@ -138,9 +138,9 @@ export function LiveVerificationView({
           </span>
         </div>
 
-        <div className="flex items-center gap-4 text-xs font-semibold">
+        <div className="flex items-center gap-3 text-xs font-semibold">
           {/* Viewport badge */}
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-slate-800 text-slate-200 border border-slate-700">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.05] text-slate-200 border border-white/[0.08]">
             {activeViewport === 'Mobile' ? (
               <>
                 <Smartphone className="w-3.5 h-3.5 text-sky-400" />
@@ -154,39 +154,39 @@ export function LiveVerificationView({
             )}
           </div>
 
-          <div className="px-3 py-1 rounded-md bg-slate-800 text-slate-200 border border-slate-700 font-mono">
+          <div className="px-3 py-1 rounded-full bg-white/[0.05] text-slate-200 border border-white/[0.08] font-mono">
             ⏱ {formatTime(elapsedSeconds)}
           </div>
 
-          <div className="px-3 py-1 rounded-md bg-sky-950 text-sky-300 border border-sky-800 font-mono">
+          <div className="px-3 py-1 rounded-full bg-sky-500/15 text-sky-300 border border-sky-500/30 font-mono">
             Test {activeStep} of {totalSteps}
           </div>
         </div>
       </div>
 
       {/* Progress Checklist Stepper Strip */}
-      <div className="bg-slate-50 border-b border-slate-200 px-6 py-3 flex gap-3 overflow-x-auto">
-        {checklistItems.map((item, idx) => {
+      <div className="bg-white/[0.02] border-b border-white/[0.06] px-6 py-3 flex gap-3 overflow-x-auto">
+        {checklistItems.map((item) => {
           const status = itemStatuses[item.id] || 'pending';
           return (
             <div
               key={item.id}
-              className={`flex-shrink-0 flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all ${
+              className={`flex-shrink-0 flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-medium transition-all ${
                 status === 'pass'
-                  ? 'bg-emerald-50 border-emerald-300 text-emerald-800'
+                  ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
                   : status === 'fail'
-                  ? 'bg-rose-50 border-rose-300 text-rose-800'
+                  ? 'bg-rose-500/10 border-rose-500/30 text-rose-400'
                   : status === 'running'
-                  ? 'bg-sky-50 border-sky-300 text-sky-800 shadow-xs ring-1 ring-sky-300'
-                  : 'bg-white border-slate-200 text-slate-400'
+                  ? 'bg-sky-500/15 border-sky-500/40 text-sky-300 shadow-xs'
+                  : 'bg-white/[0.03] border-white/[0.08] text-slate-500'
               }`}
             >
-              {status === 'pass' && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />}
-              {status === 'fail' && <XCircle className="w-3.5 h-3.5 text-rose-600" />}
-              {status === 'running' && <Loader2 className="w-3.5 h-3.5 text-sky-600 animate-spin" />}
-              {status === 'pending' && <span className="w-3.5 h-3.5 text-slate-300 font-mono">○</span>}
+              {status === 'pass' && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />}
+              {status === 'fail' && <XCircle className="w-3.5 h-3.5 text-rose-400" />}
+              {status === 'running' && <Loader2 className="w-3.5 h-3.5 text-sky-400 animate-spin" />}
+              {status === 'pending' && <span className="w-3.5 h-3.5 text-slate-600 font-mono">○</span>}
               <span className="truncate max-w-[150px]">{item.description}</span>
-              <span className="font-mono text-[10px] text-slate-400">({item.weight}p)</span>
+              <span className="font-mono text-[10px] opacity-75">({item.weight}p)</span>
             </div>
           );
         })}
@@ -195,41 +195,41 @@ export function LiveVerificationView({
       {/* Two-Pane Body: Embedded Cloud Browser (Left) & Realtime Activity Log (Right) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 min-h-[460px]">
         {/* Left Pane: Cloud Browser Session Embed */}
-        <div className="lg:col-span-7 bg-slate-900 p-6 flex flex-col items-center justify-center relative border-b lg:border-b-0 lg:border-r border-slate-800">
-          <div className="w-full h-full flex flex-col items-center justify-center bg-slate-950 rounded-xl border border-slate-800 p-6 shadow-inner relative overflow-hidden">
+        <div className="lg:col-span-7 bg-[#05070c] p-6 flex flex-col items-center justify-center relative border-b lg:border-b-0 lg:border-r border-white/[0.06]">
+          <div className="w-full h-full flex flex-col items-center justify-center bg-[#080b14] rounded-xl border border-white/[0.08] p-6 shadow-inner relative overflow-hidden">
             {/* Viewport Frame */}
             <div
-              className={`transition-all duration-500 ease-in-out border border-slate-700 bg-white rounded-lg shadow-2xl flex flex-col overflow-hidden ${
+              className={`transition-all duration-500 ease-in-out border border-white/[0.15] bg-[#0b0f19] rounded-xl shadow-2xl flex flex-col overflow-hidden ${
                 activeViewport === 'Mobile' ? 'w-[320px] h-[400px]' : 'w-full h-[380px]'
               }`}
             >
               {/* Browser Address Bar */}
-              <div className="bg-slate-100 border-b border-slate-200 px-3 py-1.5 flex items-center gap-2 text-[11px] text-slate-500">
-                <div className="flex gap-1">
-                  <div className="w-2 h-2 rounded-full bg-rose-400" />
-                  <div className="w-2 h-2 rounded-full bg-amber-400" />
-                  <div className="w-2 h-2 rounded-full bg-emerald-400" />
+              <div className="bg-[#05070c] border-b border-white/[0.08] px-3 py-2 flex items-center gap-2 text-[11px] text-slate-400">
+                <div className="flex gap-1.5">
+                  <div className="w-2.5 h-2.5 rounded-full bg-rose-500/80" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-amber-500/80" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/80" />
                 </div>
-                <div className="flex-1 bg-white border border-slate-200 px-2 py-0.5 rounded text-slate-700 font-mono text-[10px] truncate">
+                <div className="flex-1 bg-white/[0.04] border border-white/[0.08] px-2.5 py-0.5 rounded-md text-slate-300 font-mono text-[10px] truncate">
                   🔒 https://deliverable-preview.cloud/
                 </div>
               </div>
 
               {/* Simulated Render / Stream view */}
-              <div className="flex-1 p-4 bg-slate-50 flex flex-col justify-between font-sans">
+              <div className="flex-1 p-5 bg-[#080b14] flex flex-col justify-between font-sans">
                 <div>
-                  <div className="h-4 bg-slate-200 rounded w-1/3 mb-3 animate-pulse" />
-                  <div className="h-3 bg-slate-200 rounded w-3/4 mb-2" />
-                  <div className="h-3 bg-slate-200 rounded w-1/2 mb-4" />
-                  <div className="p-3 bg-white border border-slate-200 rounded shadow-xs">
-                    <span className="text-xs font-bold text-slate-800">Kernel CDP Agent Active</span>
-                    <p className="text-[11px] text-slate-500 mt-1">
+                  <div className="h-4 bg-white/[0.08] rounded w-1/3 mb-3 animate-pulse" />
+                  <div className="h-3 bg-white/[0.05] rounded w-3/4 mb-2" />
+                  <div className="h-3 bg-white/[0.05] rounded w-1/2 mb-5" />
+                  <div className="p-4 bg-white/[0.03] border border-white/[0.08] rounded-xl">
+                    <span className="text-xs font-bold text-white">Chromium CDP Agent Active</span>
+                    <p className="text-[11px] text-slate-400 mt-1">
                       Executing DOM assertions, console error listeners, and responsive layout audit.
                     </p>
                   </div>
                 </div>
 
-                <div className="text-[10px] font-mono text-slate-400 text-center">
+                <div className="text-[10px] font-mono text-slate-500 text-center">
                   Live Viewport: {activeViewport === 'Mobile' ? '390×844 (Mobile)' : '1440×900 (Desktop)'}
                 </div>
               </div>
@@ -238,13 +238,13 @@ export function LiveVerificationView({
         </div>
 
         {/* Right Pane: Live Activity Feed */}
-        <div className="lg:col-span-5 bg-slate-900/95 text-slate-200 p-5 flex flex-col font-mono text-xs">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-800 mb-3">
-            <span className="flex items-center gap-1.5 text-slate-400 font-semibold uppercase tracking-wider text-[11px]">
+        <div className="lg:col-span-5 bg-[#05070c] text-slate-200 p-5 flex flex-col font-mono text-xs">
+          <div className="flex items-center justify-between pb-3 border-b border-white/[0.06] mb-3">
+            <span className="flex items-center gap-1.5 text-slate-400 font-semibold text-xs">
               <Terminal className="w-3.5 h-3.5 text-sky-400" />
-              Activity Feed (aria-live)
+              Activity Feed
             </span>
-            <span className="text-[10px] text-emerald-400 font-mono">CONNECTED</span>
+            <span className="text-[10px] text-emerald-400 font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">CONNECTED</span>
           </div>
 
           <div

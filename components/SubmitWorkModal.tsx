@@ -66,55 +66,55 @@ export function SubmitWorkModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-white rounded-2xl border border-slate-200 max-w-xl w-full p-6 sm:p-8 shadow-2xl relative my-8">
-        <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-6">
+    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+      <div className="bento-card bg-[#080b14]/95 backdrop-blur-xl rounded-2xl border border-white/[0.12] max-w-xl w-full p-6 sm:p-8 shadow-2xl relative my-8">
+        <div className="flex items-center justify-between pb-4 border-b border-white/[0.08] mb-6">
           <div>
-            <h3 className="text-lg font-bold text-slate-900">Submit Deliverable for AI Verification</h3>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <h3 className="text-lg font-bold text-white">Submit Deliverable for AI Verification</h3>
+            <p className="text-xs text-slate-400 mt-0.5">
               The AI cloud browser will test this URL against the approved rubric.
             </p>
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 text-lg font-bold p-1"
+            className="text-slate-400 hover:text-white text-lg font-bold p-1 transition-colors duration-150"
           >
             ✕
           </button>
         </div>
 
         {error && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-700 mb-5 flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0" />
+          <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl text-xs text-rose-400 mb-5 flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-rose-400 flex-shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
         {/* Quick Demo Pre-sets for Hackathon Evaluators */}
-        <div className="bg-sky-50/60 border border-sky-200 rounded-xl p-3.5 mb-6">
-          <div className="flex items-center gap-1.5 text-xs font-bold text-sky-900 mb-2">
-            <Sparkles className="w-3.5 h-3.5 text-sky-600" />
+        <div className="bg-sky-500/10 border border-sky-500/20 rounded-xl p-3.5 mb-6">
+          <div className="flex items-center gap-1.5 text-xs font-bold text-sky-300 mb-2">
+            <Sparkles className="w-3.5 h-3.5 text-sky-400" />
             <span>Demo Test Targets (One-Click Populate):</span>
           </div>
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
               onClick={() => handleQuickFill('good')}
-              className="px-2.5 py-1 text-[11px] font-semibold bg-white border border-sky-300 text-sky-800 rounded-md hover:bg-sky-100 transition"
+              className="px-3 py-1 text-[11px] font-semibold bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-full hover:bg-emerald-500/20 transition-colors duration-150"
             >
               ✓ 100% Passing Target
             </button>
             <button
               type="button"
               onClick={() => handleQuickFill('mobile-broken')}
-              className="px-2.5 py-1 text-[11px] font-semibold bg-white border border-amber-300 text-amber-800 rounded-md hover:bg-amber-100 transition"
+              className="px-3 py-1 text-[11px] font-semibold bg-amber-500/10 border border-amber-500/30 text-amber-400 rounded-full hover:bg-amber-500/20 transition-colors duration-150"
             >
               ⚠ 70% Mobile-Broken
             </button>
             <button
               type="button"
               onClick={() => handleQuickFill('broken-login')}
-              className="px-2.5 py-1 text-[11px] font-semibold bg-white border border-rose-300 text-rose-800 rounded-md hover:bg-rose-100 transition"
+              className="px-3 py-1 text-[11px] font-semibold bg-rose-500/10 border border-rose-500/30 text-rose-400 rounded-full hover:bg-rose-500/20 transition-colors duration-150"
             >
               ✗ &lt;60% Broken Login
             </button>
@@ -123,47 +123,47 @@ export function SubmitWorkModal({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold uppercase text-slate-700 mb-1">
+            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
               Live Staging or Production URL (HTTPS Only) *
             </label>
             <div className="relative">
-              <Globe className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+              <Globe className="w-4 h-4 text-slate-500 absolute left-3.5 top-3" />
               <input
                 type="url"
                 required
                 placeholder="https://your-deployed-site.com"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none"
+                className="w-full pl-10 pr-3.5 py-2.5 text-sm bg-[#05070c] text-white border border-white/[0.1] rounded-xl placeholder-slate-500 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 focus:outline-none"
               />
             </div>
-            <p className="text-[11px] text-slate-400 mt-1">
+            <p className="text-[11px] text-slate-500 mt-1">
               Publicly reachable URL. Private, loopback, and local IP addresses are blocked (SSRF security).
             </p>
           </div>
 
           <div>
-            <label className="block text-xs font-bold uppercase text-slate-700 mb-1">
+            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
               Optional Test Credentials
             </label>
             <div className="relative">
-              <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+              <Lock className="w-4 h-4 text-slate-500 absolute left-3.5 top-3" />
               <input
                 type="text"
                 placeholder="demo_user@example.com / tempPass123"
                 value={credentials}
                 onChange={(e) => setCredentials(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none"
+                className="w-full pl-10 pr-3.5 py-2.5 text-sm bg-[#05070c] text-white border border-white/[0.1] rounded-xl placeholder-slate-500 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 focus:outline-none"
               />
             </div>
-            <p className="text-[11px] text-slate-400 mt-1 flex items-center gap-1">
+            <p className="text-[11px] text-slate-500 mt-1 flex items-center gap-1">
               <ShieldCheck className="w-3.5 h-3.5 text-slate-500 inline" />
               <span>Encrypted with AES-256-GCM at rest, deleted 30 days after job closes.</span>
             </p>
           </div>
 
           <div>
-            <label className="block text-xs font-bold uppercase text-slate-700 mb-1">
+            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
               Freelancer Delivery Notes
             </label>
             <textarea
@@ -171,21 +171,21 @@ export function SubmitWorkModal({
               placeholder="e.g. All requirements completed. Auth tested on desktop and mobile."
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="w-full p-2.5 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none"
+              className="w-full p-3 text-sm bg-[#05070c] text-white border border-white/[0.1] rounded-xl placeholder-slate-500 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 focus:outline-none"
             />
           </div>
 
           {/* Checklist Recap */}
-          <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs">
-            <span className="font-bold text-slate-700 block mb-1.5">What the AI Agent will test:</span>
-            <ul className="list-disc list-inside space-y-0.5 text-slate-600">
+          <div className="bg-white/[0.02] border border-white/[0.08] rounded-xl p-3.5 text-xs">
+            <span className="font-bold text-slate-300 block mb-1.5">What the AI Agent will test:</span>
+            <ul className="list-disc list-inside space-y-0.5 text-slate-400">
               {checklistItems.slice(0, 4).map((i, idx) => (
                 <li key={idx} className="truncate">
                   {i.description} ({i.weight} pts)
                 </li>
               ))}
               {checklistItems.length > 4 && (
-                <li className="text-slate-400 italic">+{checklistItems.length - 4} more items</li>
+                <li className="text-slate-500 italic">+{checklistItems.length - 4} more items</li>
               )}
             </ul>
           </div>
@@ -194,14 +194,14 @@ export function SubmitWorkModal({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 border border-slate-300 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
+              className="px-4 py-2 bg-white/[0.05] border border-white/[0.1] rounded-full text-xs font-semibold text-slate-300 hover:text-white hover:bg-white/[0.1] transition-colors duration-150"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="px-5 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-lg text-xs font-bold shadow-sm transition inline-flex items-center gap-1.5 disabled:opacity-50"
+              className="px-6 py-2 bg-white hover:bg-slate-200 text-slate-950 rounded-full text-xs font-bold shadow-lg shadow-white/10 active:scale-[0.98] transition-transform duration-150 inline-flex items-center gap-1.5 disabled:opacity-50"
             >
               {submitting ? (
                 <>
