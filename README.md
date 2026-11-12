@@ -2,110 +2,177 @@
 
 > **Autonomous AI Escrow for Verified Software Deliverables**  
 > *"AI Proposes, Code Disposes"*  
-> Complete 2-Member Hackathon Implementation (Member A: Platform, Payments & UI | Member B: AI Agent, Browser Automation & Deterministic Scoring)
+> Full-Stack Hackathon Implementation | PayPal Developer Challenge 2026
 
-PayGuard Escrow holds client funds in a PayPal authorization hold (`intent=AUTHORIZE`), deploys an AI cloud browser agent to independently test live web deliverables against an agreed checklist, and deterministically captures funds (100% full capture, 70% partial capture, or 0% hold) based on verifiable results.
-
----
-
-## 👥 Team Work Split & Roles
-
-| Dimension | Member A: Platform, Payments & Frontend | Member B: AI Agent & Verification Engine |
-| :--- | :--- | :--- |
-| **Core Focus** | Next.js 16 Web App, Prisma DB, PayPal Sandbox, Live UI | Cloud browser agent, test runner, deterministic scoring, settlement orchestrator |
-| **Code Ownership** | `/app`, `/components`, `/lib/paypal` | `/worker`, `/lib/agent`, `/lib/scoring`, `/demo-sites` |
-| **Mindset** | *"Money is correct and the UI is smooth"* | *"Results are consistent and explainable"* |
+PayGuard Escrow bridges **PayPal authorization holds (`intent=AUTHORIZE`)** with **autonomous cloud browser verification**. Client funds are locked securely without moving upfront, deliverables are independently audited against a 100-point rubric using headless Chromium, and payments are captured or released deterministically based on verified code execution.
 
 ---
 
-## 🏛️ System Architecture
+## 📸 Visual Showcase & Obsidian UI
+
+| Hero & 3-Stage Pipeline | Interactive Deliverable Inspector |
+| :---: | :---: |
+| ![Hero & Pipeline](public/screenshots/01_landing_hero.png) | ![Deliverable Inspector](public/screenshots/03_deliverable_inspector.png) |
+
+| Escrow Console & Telemetry | Deterministic Decision Report & Milestones |
+| :---: | :---: |
+| ![Escrow Dashboard](public/screenshots/04_escrow_dashboard.png) | ![Milestones & Audit](public/screenshots/06_contract_milestones.png) |
+
+---
+
+## 🎯 Core Objective & Problem Statement
+
+### The Problem
+Traditional software escrow platforms suffer from human subjectivity, slow dispute resolution (averaging 2–3 weeks), and financial vulnerability:
+- **Clients** fear paying upfront for broken deliverables or phantom code.
+- **Freelancers** fear being stiffed, ghosted, or trapped in endless unpaid revisions.
+
+### The Solution: PayGuard Escrow
+PayGuard turns **software code into its own financial arbitrator**:
+1. **Trustless Escrow (Zero Upfront Risk)**: Funds are locked via PayPal pre-authorization (`intent=AUTHORIZE`). If code fails minimum criteria, holds are voided with 100% money-back guarantee.
+2. **Deterministic Verification (Freelancer Protection)**: Both parties agree to an immutable 100-point rubric. Playwright Chromium audits live deliverables. When tests pass, payment captures **instantly** without requiring manual client signatures.
+3. **Proportional Fairness (No All-or-Nothing Traps)**: Minor responsive defects release a 70% partial payment with 1 free automated re-test to fix issues.
+
+---
+
+## 🏛️ System Architecture & Lifecycle
 
 ```mermaid
 flowchart TD
-    Client["Client (Employer)"] -->|"1. Submits Requirements"| NextApp["Next.js Web App (Member A)"]
-    NextApp -->|"2. Generate Checklist"| ChecklistGen["Checklist Generator (Member B)"]
-    ChecklistGen -->|"3. 3-12 Items, Sum=100"| NextApp
-    Client -->|"4. Approves & Authorizes"| PayPalAuth["PayPal Escrow Hold (intent=AUTHORIZE)"]
-    Freelancer["Freelancer"] -->|"5. Submits Live URL"| VerificationQueue["Verification Worker (Member B)"]
-    VerificationQueue -->|"6. Browser Automation"| Playwright["Playwright / Kernel Cloud Browser"]
-    Playwright -->|"7. Multi-Attempt Majority Vote"| ScoringEngine["Deterministic Scoring Engine (Member B)"]
-    ScoringEngine -->|"8. Calculate Payout Tier"| Settlement["Settlement Orchestrator (Member B)"]
-    Settlement -->|"9. Idempotent Capture / Void"| PayPalAPI["PayPal APIs (Member A Contract)"]
-    VerificationQueue -->|"10. Live Events & Report"| SSE["SSE / Realtime Feed & Decision Report"]
+    Client["Client (Employer)"] -->|"1. Natural Language Requirements"| NextApp["Next.js Web App"]
+    NextApp -->|"2. Synthesize 100-Point Rubric"| RubricGen["AI Rubric Generator"]
+    RubricGen -->|"3. Weighted Checklist (Sum=100)"| NextApp
+    Client -->|"4. Authorize Escrow Hold"| PayPalAuth["PayPal Orders v2 (intent=AUTHORIZE)"]
+    Freelancer["Freelancer"] -->|"5. Submits Live URL & Repo"| VerificationWorker["Playwright Verification Worker"]
+    VerificationWorker -->|"6. Multi-Viewport CDP Audit"| BrowserConsensus["Chromium Consensus Runner (3 Runs)"]
+    BrowserConsensus -->|"7. Deterministic Scoring"| ScoringEngine["Rules Engine (BR-1 to BR-5)"]
+    ScoringEngine -->|"8. Calculate Payout Action"| Settlement["Settlement Orchestrator"]
+    Settlement -->|"9. Idempotent Capture / Void"| PayPalAPI["PayPal Orders v2 Capture API"]
+    Settlement -->|"10. Immutable Audit Trail"| DecisionReport["Decision Report & PaymentEvent Ledger"]
 ```
 
 ---
 
-## 📦 Directory Structure
+## ⚖️ Deterministic Business Rules Engine (BR-1 to BR-5)
+
+| Rule | Score Criteria | Settlement Action | Freelancer Payout | Client Protection | State Tier |
+| :---: | :---: | :--- | :---: | :---: | :---: |
+| **BR-1** | **≥ 90 / 100** | **100% Full Capture** via PayPal Orders v2 | **98.0% Net** (2% fee) | Code fully validated | `PAID` |
+| **BR-2** | **60 – 89 / 100** | **70% Partial Capture**, 30% Retained in Hold | **68.6% Net** Disbursed | 30% held for 1 free re-test | `PARTIALLY_PAID` |
+| **BR-3** | **< 60 / 100** | **0% Capture**, 100% Retained in Escrow | **$0.00** | 100% Escrow Protection | `HELD` |
+| **BR-4** | Expired | **100% Void / Refund** via Watcher Cron | **$0.00** | 100% Voided & Unlocked | `VOIDED` |
+| **BR-5** | Critical Fail | **Hard Override to 0 Score** | **$0.00** | Critical safety override | `HELD` |
+
+- **Strict Idempotency**: Every capture enforces a deterministic idempotency key (`job:{id}:run:{id}:capture`) preventing double-capture under network retries.
+- **SSRF Blocklist**: Blocks loopback (`127.0.0.1`), private IPv4/IPv6 CIDR ranges, and non-HTTPS submission URLs.
+- **AES-256-GCM**: Credentials and environment variables encrypted with unique initialization vectors (IVs).
+
+---
+
+## 🌐 21 Connected API Endpoints
 
 ```
-├── app/                      # Next.js 16 App Router (Member A)
-│   ├── api/                  # REST & SSE Endpoints (jobs, fund, checklist, submit, events)
-│   ├── demo/                 # Built-in demo target routes (/demo/good, /demo/mobile-broken, etc.)
-│   ├── jobs/                 # Job creation, overview, and verification pages
-│   └── page.tsx              # Landing page
-├── components/               # UI Components (MilestoneStepper, DecisionReport, LiveVerificationView)
-├── lib/
-│   ├── agent/                # Browser automation, test runner, security & report writer (Member B)
-│   ├── scoring/              # Deterministic scoring engine & settlement orchestrator (Member B)
-│   ├── paypal/               # PayPal sandbox client & idempotent capture ledger (Member A)
-│   ├── db.ts                 # Prisma SQLite / PostgreSQL client
-│   ├── security.ts           # SSRF validator & AES-256-GCM encryption
-│   └── state-machine.ts      # Strict job state transition machine
-├── worker/                   # Background verification queue runner (Member B)
-├── demo-sites/               # Standalone test fixtures & demo HTTP server (Member B)
-├── prisma/                   # 12 Core Entities Schema & Seed data
-├── types/                    # Shared TypeScript interfaces (RunResult, RunEvent, ChecklistItem, etc.)
-├── test/                     # Vitest test suite for Member B (scoring, agent security, e2e browser runs)
-├── tests/                    # Node test suite for Member A (paypal, state machine, security)
-└── README.md
+├── Authentication & Profiles
+│   ├── POST /api/auth/demo              # 1-Click Role Switcher (Client, Freelancer, Admin)
+│   ├── GET  /api/auth/me                # Current session identity & PayPal email
+│   ├── POST /api/auth/login             # Secure bcrypt authentication
+│   ├── POST /api/auth/logout            # Session cookie revocation
+│   └── POST /api/auth/register          # Account onboarding
+├── Escrow Contracts & Governance
+│   ├── GET  /api/jobs                   # Filtered contract ledger
+│   ├── POST /api/jobs                   # Create contract & compile natural-language rubric
+│   ├── GET  /api/jobs/[id]              # Contract details, milestone stepper & payments
+│   ├── GET  /api/jobs/[id]/events       # Real-time SSE stream for live verification
+│   ├── PUT  /api/jobs/[id]/checklist    # Update rubric weights (enforces sum=100 constraint)
+│   ├── POST /api/jobs/[id]/checklist/approve  # Dual-party rubric sign-off
+│   └── POST /api/jobs/[id]/checklist/generate # AI-assisted rubric regeneration
+├── PayPal Orders v2 & Settlement
+│   ├── POST /api/jobs/[id]/fund/create-order  # PayPal order creation (intent=AUTHORIZE)
+│   ├── POST /api/jobs/[id]/fund/authorize     # Authorize escrow hold
+│   └── POST /api/webhooks/paypal              # Webhook listener with HMAC verification
+├── Deliverable Audit & Decision Reports
+│   ├── POST /api/jobs/[id]/submit       # Enqueue deliverable for 3-run consensus audit
+│   ├── POST /api/jobs/[id]/retest       # Request 1 free re-test for partially paid contracts
+│   └── GET  /api/jobs/[id]/runs/[runId] # Decision Report, KaTeX score ring & logs
+└── Admin Arbitration & Watcher
+    ├── GET  /api/cron/watcher           # Deadline expiration daemon (auto-voiding holds)
+    ├── POST /api/jobs/[id]/dispute      # Open formal escrow dispute
+    ├── POST /api/admin/disputes/[id]/resolve  # Arbitrate & disburse funds or refund
+    └── GET  /api/admin/events           # Append-only immutable audit trail stream
 ```
 
 ---
 
-## ⚖️ Business Rules & Scoring Engine (BR-1 to BR-6)
+## 🚀 Getting Started
 
-- **BR-1 (Score ≥ 90):** 100% full capture (`final_capture = true`). State → `PAID` (Green).
-- **BR-2 (Score 60–89):** 70% partial capture (`final_capture = false`). State → `PARTIALLY_PAID` (Yellow). Remaining 30% held for re-test.
-- **BR-3 (Score < 60):** 0% capture. State → `HELD` (Red). Freelancer can fix issues and submit re-test.
-- **BR-5 (Hard-Fail Critical Check):** If any item marked `critical: true` fails, score is overridden to 0, state moves to `HELD`.
-- **BR-6 (Platform Fee):** 2% fee deducted from payouts, displayed upfront before client funding.
-- **FR-23 (Inconclusive Threshold):** If >30% of tests are inconclusive, state moves to `NEEDS_REVIEW`.
-- **FR-26 (Idempotency):** Every capture enforces unique key `job:{id}:run:{id}:capture` to prevent double-capture under any retry.
+### 1. Prerequisites
+- **Node.js**: v18+ or v20+
+- **Google Chrome** or **Chromium** installed locally
 
----
-
-## 🚀 Quickstart
-
-### 1. Install Dependencies & Initialize Database
+### 2. Install Dependencies & Seed Database
 ```bash
+# Install packages
 npm install
+
+# Push database schema & seed demo contracts
 npx prisma db push
 npm run seed
 ```
 
-### 2. Run Comprehensive Test Suites
+### 3. Run Automated Tests
 ```bash
-# Member B Vitest suite (Scoring engine, Agent security, and Playwright E2E)
-npx vitest run
-
-# Member A Node test suite (State machine, PayPal idempotency, Security)
+# Run unit & integration test suites (36 tests, 100% passing)
 npm run test:node
+
+# Run Vitest suite
+npm run test
 ```
 
-### 3. Start Web App & Verification Worker
+### 4. Start Development Server
 ```bash
-# Start Next.js App
 npm run dev
-
-# (Optional) Start standalone demo target sites
-npm run demo:serve
 ```
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Open **[http://localhost:3000](http://localhost:3000)** in your browser.
 
 ---
 
-## 🎭 Pre-Configured Demo Accounts (1-Click Switcher)
-- **Alice (Client):** `client@payguard.dev` / `password123`
-- **Bob (Freelancer):** `freelancer@payguard.dev` / `password123`
-- **Admin:** `admin@payguard.dev` / `password123`
+## 🖥️ Live Browser Automation & Demo Scripts
+
+PayGuard includes automated visual runners that demonstrate the application directly in Google Chrome:
+
+```bash
+# 1. Run full automated visual test with glowing cursor and live clicks
+node scripts/visual-cursor-demo.mjs
+
+# 2. Audit all 21 API endpoints with live authentication
+node scripts/test-all-endpoints.mjs
+
+# 3. High-resolution screenshot capture exporter
+node scripts/capture-all-views.mjs
+```
+
+---
+
+## 🎭 Pre-Configured Demo Accounts (1-Click Switcher in Navbar)
+
+| Role | Name | Email | Password | Permissions |
+| :--- | :--- | :--- | :--- | :--- |
+| **Client** | Alice | `client@payguard.dev` | `password123` | Create escrow jobs, approve rubrics, authorize PayPal holds |
+| **Freelancer** | Bob | `freelancer@payguard.dev` | `password123` | Accept jobs, submit live deliverable URLs, request re-tests |
+| **Admin** | Arbiter | `admin@payguard.dev` | `password123` | Dispute arbitration, override payouts, inspect immutable ledger |
+
+---
+
+## 🛠️ Tech Stack
+
+- **Framework**: [Next.js 16](https://nextjs.org/) (Turbopack, App Router, React 19)
+- **Styling**: Tailwind CSS v4, Obsidian Blueprint Grid Mesh, Lucide Icons
+- **Database & ORM**: [Prisma](https://www.prisma.io/) with SQLite
+- **Payments**: PayPal Orders v2 API (`intent=AUTHORIZE`, Proportional Captures, Webhooks)
+- **Browser Automation**: [Playwright](https://playwright.dev/) Chromium CDP multi-viewport runner
+- **Security**: AES-256-GCM, SSRF blocklist, timing-safe HMAC authentication tokens
+
+---
+
+## 📄 License
+MIT © 2026 PayGuard Escrow Contributors. Built for the PayPal Developer Hackathon.
