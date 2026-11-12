@@ -17,7 +17,7 @@
     "rehearse": "tsx scripts/rehearse-demo.ts",
     "worker": "tsx worker/index.ts",
     "demo:serve": "tsx demo-sites/server.ts",
-    "postinstall": "prisma skills sync || exit 0"
+    "postinstall": "prisma generate"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
