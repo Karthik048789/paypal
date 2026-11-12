@@ -11,8 +11,8 @@ export interface PayPalCredentials {
 
 function getCredentials(): PayPalCredentials {
   return {
-    clientId: process.env.PAYPAL_CLIENT_ID || 'sb-client-id-payguard-demo',
-    clientSecret: process.env.PAYPAL_CLIENT_SECRET || 'sb-client-secret-payguard-demo',
+    clientId: process.env.PAYPAL_CLIENT_ID || '',
+    clientSecret: process.env.PAYPAL_CLIENT_SECRET || '',
     mode: (process.env.PAYPAL_MODE as 'sandbox' | 'live') || 'sandbox',
   };
 }
@@ -27,7 +27,11 @@ export async function getPayPalAccessToken(): Promise<string> {
   const creds = getCredentials();
 
   // If using demo mock credentials, return a mock token
-  if (creds.clientId.startsWith('sb-client-id') && creds.clientSecret.startsWith('sb-client-secret')) {
+  if (
+    !creds.clientId ||
+    !creds.clientSecret ||
+    (creds.clientId.startsWith('sb-client-id') && creds.clientSecret.startsWith('sb-client-secret'))
+  ) {
     return 'mock_access_token_' + Date.now();
   }
 

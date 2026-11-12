@@ -6,8 +6,13 @@ const IV_LENGTH = 16;
 const TAG_LENGTH = 16;
 
 function getEncryptionKey(): Buffer {
-  const hexKey = process.env.CREDENTIALS_ENCRYPTION_KEY || '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
-  return Buffer.from(hexKey, 'hex');
+  const hexKey = process.env.CREDENTIALS_ENCRYPTION_KEY;
+  if (hexKey) return Buffer.from(hexKey, 'hex');
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('CREDENTIALS_ENCRYPTION_KEY must be set (64 hex characters)');
+  }
+  // Local development only: derive a throwaway key so the app runs without configuration.
+  return crypto.createHash('sha256').update('payguard-local-dev-only').digest();
 }
 
 /**
