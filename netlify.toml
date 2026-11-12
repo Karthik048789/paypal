@@ -5,6 +5,7 @@
 [build.environment]
   NODE_VERSION = "22"
   PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD = "1"
+  SECRETS_SCAN_OMIT_KEYS = "PAYPAL_MODE"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
