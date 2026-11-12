@@ -1,9 +1,9 @@
 [build]
-  command = "npm run build"
+  command = "([ -d node_modules/postcss ] || npm ci) && npm run build"
   publish = ".next"
 
 [build.environment]
-  NODE_VERSION = "20"
+  NODE_VERSION = "22"
   PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD = "1"
 
 [[plugins]]
